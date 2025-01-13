@@ -24,7 +24,6 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			json_string = string_replace_all(json_string, "index_type", "\"index_type\"");
 			json_string = string_replace_all(json_string, "pos_x", "\"pos_x\"");
 			
-			show_debug_message(json_string);
 			var loaded_charts = json_parse(json_string);
 			
 			var dif = ["easy", "normal", "hard"];
@@ -60,10 +59,9 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			json_string = string_replace_all(json_string, "count_gold", "\"count_gold\"");
 			json_string = string_replace_all(json_string, "total_hits", "\"total_hits\"");
 			
-			show_debug_message(json_string);
 			var loaded_game_points = json_parse(json_string);
 			
-			json_string = ini_read_string("Main", "Chartss", global.charts);
+			json_string = ini_read_string("Main", "Charts", global.charts);
 			json_string = string_replace_all(json_string, "normal", "\"normal\"");
 			json_string = string_replace_all(json_string, "hard", "\"hard\"");
 			json_string = string_replace_all(json_string, "easy", "\"easy\"");
@@ -73,18 +71,25 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			json_string = string_replace_all(json_string, "index_type", "\"index_type\"");
 			json_string = string_replace_all(json_string, "pos_x", "\"pos_x\"");
 			
-			show_debug_message(json_string);
 			var saved_game_charts = json_parse(json_string);
+			
+			json_string = ini_read_string("Main", "WinsLifebar", global.wins_lifebar);
+			json_string = string_replace_all(json_string, "normal", "\"normal\"");
+			json_string = string_replace_all(json_string, "hard", "\"hard\"");
+			json_string = string_replace_all(json_string, "easy", "\"easy\"");
+			
+			var loaded_wins = json_parse(json_string);
 			
 			var dif = ["easy", "normal", "hard"];
 			for (var d = 0; d < 3; d++) {
 				var difficulty = dif[d];
-				for (var i = 0; i < array_length(global.game_points[$ difficulty].total_hits); i++) {
-					if (i < array_length(global.song_text_list) && i < array_length(saved_game_charts[$ difficulty].charts)) { 
-						if (saved_game_charts[$ difficulty].charts[i] == global.charts[$ difficulty].charts[i]) {
+				for (var i = 0; i < array_length(global.song_text_list); i++) {
+					if (i < array_length(saved_game_charts[$ difficulty].charts)) { 
+						if (array_length(saved_game_charts[$ difficulty].charts[i]) == array_length(global.charts[$ difficulty].charts[i])) {
 							global.game_points[$ difficulty].count_silver[i] = loaded_game_points[$ difficulty].count_silver[i];
 							global.game_points[$ difficulty].count_gold[i] = loaded_game_points[$ difficulty].count_gold[i];
 							global.game_points[$ difficulty].total_hits[i] = loaded_game_points[$ difficulty].total_hits[i];
+							global.wins_lifebar[$ difficulty][i] = loaded_wins[$ difficulty][i];
 						}
 					}
 				}
@@ -153,15 +158,15 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
         ini_close();
 		
 		if (global.first_load) {
-        show_message(global.current_language == "ENGLISH"
-            ? "Game data loaded successfully from " + string(dir_path) + "."
-            : "Datos de guardado cargados exitosamente desde " + string(dir_path) + ".");
+	        show_message(global.current_language == "ENGLISH"
+	            ? "Game data loaded successfully from " + string(dir_path) + "."
+	            : "Datos de guardado cargados exitosamente desde " + string(dir_path) + ".");
 		}
 	} else {
 		if (global.first_load) {
-        show_message(global.current_language == "ENGLISH"
-            ? "Save file not found."
-            : "Archivo de guardado no encontrado.");
+	        show_message(global.current_language == "ENGLISH"
+	            ? "Save file not found."
+	            : "Archivo de guardado no encontrado.");
 		} else {
 			show_debug_message("SAVE DATA NOT FOUND.")
 		}
@@ -176,6 +181,7 @@ function save_ini_data(dir_path=working_directory + "save_data.ini") {
 	// Sección de configuración general
 	ini_write_string("Main", "Charts", global.charts);
 	ini_write_string("Main", "GamePoints", global.game_points);
+	ini_write_string("Main", "WinsLifebar", global.wins_lifebar);
 		
 	// Sección de colores de la interfaz
 	ini_write_real("Settings", "CurrentSFXIndex", global.current_sfx_index);

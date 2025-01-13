@@ -15,7 +15,7 @@ if (global.lifebar && (global.is_playing || global.practice_mode)) {
 	draw_set_color(global.primary_color_yellow);
 	draw_set_font(splat_font_title);
 	if (!auto_bot_enabled) draw_text(85 - (global.current_language == "ENGLISH" ? string_width("LIFE") : 3+string_width("VIDA")), 360, global.current_language == "ENGLISH" ? "LIFE" : "VIDA");
-	else draw_text(85 - string_width("BOT"), 360, "BOT");; 
+	else draw_text(85 - string_width("BOT"), 360, "BOT");
 	draw_rectangle(63, 358, 65, 158, 0);
 	if (obj_play.play_music && !global.practice_mode) {
 		draw_set_color(global.secondary_color_purple);
@@ -27,4 +27,6 @@ if (global.lifebar && (global.is_playing || global.practice_mode)) {
 	}
 	draw_set_color(c_white);
 	draw_rectangle(32, 358, 94, 352, 0);
+} else if (auto_bot_enabled && (global.is_playing || global.practice_mode)) {
+	draw_text(85 - string_width("BOT"), 360, "BOT");
 }

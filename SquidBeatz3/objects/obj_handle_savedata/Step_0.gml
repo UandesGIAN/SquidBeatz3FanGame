@@ -36,7 +36,7 @@ if (message_shown) {
 	}
 
 	// Botón "[PROGRESS]"
-	if ((mouse_check_button_pressed(mb_left) && mx > msg_x + msg_width / 2 - string_width("[PROGRESS]") - 10 && mx < msg_x + msg_width / 2 + string_width("[PROGRESS]") + 10 && my > msg_y + 120 - padding && my < msg_y + 120 + padding + 20) || (selected_row == 1 && keyboard_check_pressed(vk_enter))) {
+	if ((mouse_check_button_pressed(mb_left) && mx > msg_x + msg_width / 2 - string_width("[PROGRESS]") - 10 && mx < msg_x + msg_width / 2 + string_width("[PROGRESS]") + 10 && my > msg_y + 140 - padding && my < msg_y + 120 + padding + 40) || (selected_row == 1 && keyboard_check_pressed(vk_enter))) {
 	    load_ini_data(load_path, "game_points");
 	    message_shown = 0;
 	    with (obj_editor_button) {
@@ -47,7 +47,7 @@ if (message_shown) {
 	}
 
 	// Botón "[SETTINGS]"
-	if ((mouse_check_button_pressed(mb_left) && mx > msg_x + msg_width / 2 - string_width("[SETTINGS]") - 10 && mx < msg_x + msg_width / 2 + string_width("[SETTINGS]") + 10 && my > text_y + 120 + 15 - padding && my < text_y + 120 + 20 + padding) || (selected_row == 2 && keyboard_check_pressed(vk_enter))) {
+	if ((mouse_check_button_pressed(mb_left) && mx > msg_x + msg_width / 2 - string_width("[SETTINGS]") - 10 && mx < msg_x + msg_width / 2 + string_width("[SETTINGS]") + 10 && my > text_y + 140 + 20 - padding && my < text_y + 140 + 40 + padding) || (selected_row == 2 && keyboard_check_pressed(vk_enter))) {
 	    load_ini_data(load_path, "settings");
 	    message_shown = 0;
 	    with (obj_editor_button) {

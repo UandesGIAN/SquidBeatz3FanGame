@@ -83,7 +83,7 @@ if (!play_music && ((keyboard_check_pressed(vk_left) || keyboard_check_pressed(v
 	
 	stick_moved = 1;
 	obj_sync.game_win_for_first_time = 0;
-	if (array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0)
+	if ((array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0) || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) 
 		obj_sync.game_win = 1;
 	else
 		obj_sync.game_win = 0;
@@ -126,7 +126,7 @@ if (!play_music && ((keyboard_check_pressed(vk_right) || keyboard_check_pressed(
 	
 	stick_moved = 1;
 	obj_sync.game_win_for_first_time = 0;
-	if (array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0)
+	if ((array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0) || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index]))
 		obj_sync.game_win = 1;
 	else
 		obj_sync.game_win = 0;

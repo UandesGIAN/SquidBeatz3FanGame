@@ -158,7 +158,7 @@ if (message_shown3) {
 	
 	// Botón de "SALIR"
     draw_set_color(global.secondary_color_purple);
-    if (global.current_language == "ENGLISH") draw_text(room_width / 2, room_height / 2 + 100 - 25, "EXIT");
-	else draw_text(room_width / 2, room_height / 2 + 100 - 25, "SALIR");
+    if (global.current_language == "ENGLISH") draw_text(room_width / 2, room_height / 2 + 70 - 25, "EXIT");
+	else draw_text(room_width / 2, room_height / 2 + 70 - 25, "SALIR");
 	draw_set_color(c_white);
 }

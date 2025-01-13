@@ -1,9 +1,4 @@
 if (global.new_song_id == undefined && global.new_song_name == "") {
-	if (keyboard_check(vk_control) && keyboard_check(vk_alt) && keyboard_check(ord("B")) && keyboard_check_pressed(ord("N"))) {
-	    auto_bot_enabled = !auto_bot_enabled;
-	    show_message("Auto bot: " + (auto_bot_enabled ? "ENABLED" : "DISSABLED"));
-	}
-	
 	elements = global.charts[$ global.current_difficulty].charts[global.current_chart_index];
 	array_sort(elements, function(a, b) { return a.pos_x - b.pos_x; });
 	if (global.is_playing == 1 && ((obj_play.play_music && !global.practice_mode || global.practice_mode))) {
@@ -251,7 +246,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 						alpha_hit = [];
 						text_timer = current_time;
 						if (!global.practice_mode) {
-							current_life -= 30;
+							current_life -= 20;
 							if (current_life <= 0) current_life = 0;
 						}
 					}
@@ -259,7 +254,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 				input_sync_type = -1;
 			}
 	
-			if (obj_game2.total_notes == local_total_hits && (!global.practice_mode && !auto_bot_enabled)) {
+			if ((obj_game2.total_notes == local_total_hits || global.lifebar && current_element_index == array_length(elements) && !global.wins_lifebar[$ global.current_difficulty][global.current_chart_index]) && (!global.practice_mode && !auto_bot_enabled)) {
 				if ((array_length(elements) - global.game_points[$ global.current_difficulty].count_gold[global.current_chart_index]) == 0) {
 			        if (last_win_category != "gold") {
 			            game_win = 1;
@@ -267,15 +262,18 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 			        }
 			        last_win_category = "gold"; // Actualizar la categoría ganada
 			    }
-			    // Verificar si ganó en la categoría Silver
-			    else if ((array_length(elements) - global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index]) == 0) {
-			        if (last_win_category != "bronze") {
+			    // Verificar si ganó en la categoría Bronze
+			    else if ((array_length(elements) - global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index]) == 0 || (global.lifebar && current_element_index == array_length(elements) && !global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) {
+					if (last_win_category != "bronze") {
 			            game_win = 1;
 			            game_win_for_first_time = 1;
 			        }
 			        last_win_category = "bronze"; // Actualizar la categoría ganada
+					if (global.lifebar && current_element_index == array_length(elements)) {
+						global.wins_lifebar[$ global.current_difficulty][global.current_chart_index] = 1;
+					}
 			    }
-			    // Verificar si ganó en la categoría Gold y Silver combinados
+			    // Verificar si ganó en la categoría Silver
 			    else if ((array_length(elements) - (global.game_points[$ global.current_difficulty].count_gold[global.current_chart_index] + global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index])) == 0) {
 			        if (last_win_category != "silver") {
 			            game_win = 1;
@@ -288,8 +286,11 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 				obj_handle_savedata.save_ini_data();
 			}
 		}
-	
 	} else {
+		if (keyboard_check(vk_control) && keyboard_check(vk_alt) && keyboard_check(ord("B")) && keyboard_check_pressed(ord("N"))) {
+		    auto_bot_enabled = !auto_bot_enabled;
+		    show_message("Auto bot: " + (auto_bot_enabled ? "ENABLED" : "DISSABLED"));
+		}
 		if (!global.practice_mode) {
 			local_count_silver = 0;
 			local_count_gold = 0;

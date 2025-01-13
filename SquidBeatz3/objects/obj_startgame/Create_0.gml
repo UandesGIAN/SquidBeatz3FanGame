@@ -34,6 +34,11 @@ if (!variable_global_exists("game_points")) {
 						 "normal": {"count_silver": [0], "count_gold": [0], "total_hits": [0]},
 						 "hard": {"count_silver": [0], "count_gold": [0], "total_hits": [0]}};
 }
+if (!variable_global_exists("wins_lifebar")) {
+	global.wins_lifebar = {"easy": [0],
+						 "normal": [0],
+						 "hard": [0]};
+}
 
 if (!variable_global_exists("sound_effects")) {
     global.sound_effects = [
@@ -251,6 +256,8 @@ function load_songs_from_directory(dir_path=working_directory+"sounds\\") {
 			array_push(global.game_points[$ difficulty].count_silver, 0);
 	        array_push(global.game_points[$ difficulty].count_gold, 0);
 	        array_push(global.game_points[$ difficulty].total_hits, 0);
+			
+			array_push(global.wins_lifebar[$ difficulty], 0);
         }
 		
 		var visualizer_file = visualizer_files[i];

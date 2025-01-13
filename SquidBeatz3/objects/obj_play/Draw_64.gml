@@ -126,7 +126,6 @@ var alpha = progress; // Opacidad entre 0 y 1
 var scale = lerp(start_scale, end_scale, progress); // Escala progresiva
 
 var total_elements = array_length(global.charts[$ global.current_difficulty].charts[global.current_song_index]);
-var total_hits = global.game_points[$ global.current_difficulty].total_hits[global.current_song_index];
 
 if (obj_sync.game_win_for_first_time && total_elements > 0) {
 	if (total_elements == global.game_points[$ global.current_difficulty].count_gold[global.current_song_index]) {
@@ -139,8 +138,8 @@ if (obj_sync.game_win_for_first_time && total_elements > 0) {
         if (global.octo_icons) draw_sprite_ext(spr_silver_octo, 0, x+80, y, scale, scale, 0, c_white, alpha);
 		else draw_sprite_ext(spr_silver, 0, x+80, y, scale, scale, 0, c_white, alpha);
         draw_set_alpha(1);
-    } else if (total_elements == global.game_points[$ global.current_difficulty].count_silver[global.current_song_index]) {
-        draw_set_alpha(alpha);
+    } else if (total_elements == global.game_points[$ global.current_difficulty].count_silver[global.current_song_index] || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) {
+		draw_set_alpha(alpha);
         if (global.octo_icons) draw_sprite_ext(spr_bronze_octo, 0, x+80, y, scale, scale, 0, c_white, alpha);
 		else draw_sprite_ext(spr_bronze, 0, x+80, y, scale, scale, 0, c_white, alpha);
         draw_set_alpha(1);
@@ -153,7 +152,7 @@ if (obj_sync.game_win_for_first_time && total_elements > 0) {
 		} else if (total_elements == global.game_points[$ global.current_difficulty].count_silver[global.current_song_index] + global.game_points[$ global.current_difficulty].count_gold[global.current_song_index]) {
 			if (global.octo_icons) draw_sprite(spr_silver_octo, 0, x+80, y);
 			else draw_sprite(spr_silver, 0, x+80, y);
-		} else if (total_elements == global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index]) {
+		} else if (total_elements == global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index] || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) {
 			if (global.octo_icons) draw_sprite(spr_bronze_octo, 0, x+80, y);
 			else draw_sprite(spr_bronze, 0, x+80, y);
 		}
