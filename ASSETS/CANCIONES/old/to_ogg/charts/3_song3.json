@@ -1,0 +1,17 @@
+{
+    "easy": {
+        "chart": [],
+        "tempo": 156,
+        "start_point": 608
+    },
+    "normal": {
+        "chart": [],
+        "tempo": 156,
+        "start_point": 608
+    },
+    "hard": {
+        "chart": [],
+        "tempo": 156,
+        "start_point": 608
+    }
+}

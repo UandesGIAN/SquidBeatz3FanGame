@@ -1,0 +1,65 @@
+1. Corrección de Bugs y Problemas Técnicos (1) [14/14]
+
+Game: (1) [4/4]
+	- Sincronizar música con la barra. (1)
+	- Sincronizar música con la barra al darle a play entre medio. (1)
+	- Quitar is_playing si el índice es 0. (1)
+	- Al crear canción, permitir probarla sin necesidad de salir a otra pantalla. (1)
+
+Chart Game (crear/editar charteos): (1) [10/10]
+	- Actualizar bien la canción a reemplazar. (1)
+	- Solo agrega elementos si click debajo de donde pone x: base_x. (1)
+	- No pueden haber 2 elementos sobre uno que ya esté agregado. (1)
+	- Quitar borrar al darle click derecho justo encima. (1)
+	- Arreglar coordenada x selected. (1)
+	- Sincronizar música con la barra. (1)
+	- Al desactivar checkpoint toggle, quita que al reiniciar con R inicia dándole play. 	(1)
+	- Arreglar comportamiento de teclas A/D y W/S al mover elementos, borrarlos y 		re-agregarlos. (1)
+	- Si click fuera del espacio de la barra, deseleccionar sin añadir elemento. (1)
+	- Mejorar checkpoint y auto checkpoint, tal de que aparezca en la coordenada 		de la segunda barra (la 1). (1)
+
+
+2. Diseño de Interfaz y Experiencia de Usuario (1) [13/13]
+
+Game: (1) [6/6]
+	- Crear sprites de botones para PC. (1)
+	- Mejorar resolución de sprites. (1)
+	- Manejo para idiomas (EN y ES). (1)
+	- Arreglar colores. (1)
+	- A prueba de errores (archivos). (1)
+	- Sonidos. (1)
+
+Chart Game (crear/editar charteos): (1) [4/4]
+	- Mejorar interfaz y feedback. (1)
+	- Mejorar mensaje del Ctrl+Supr para borrar todo. (1)
+	- Mejorar acceso a los controles y hacerlo más ordenado y claro. (1)
+	- Indicar número de notas. (1)
+
+Chart Game (sistema de archivos y canción nueva): (1) [3/3]
+	- Mejorar mensajes de feedback y diseño (EN y ES). (1)
+	- Añadir aviso sobre agregar canción y el formato necesario. (1)
+	- Hacer más diálogos IN-GAME para mensajes importantes. (1)
+
+
+3. Funcionalidades de Edición de Chart (1) [6/6]
+
+Chart Game (crear/editar charteos): (1) [6/6]
+	- Agregar que con la rueda del ratón se mueve levemente la barra. (1)
+	- Permitir mover elementos seleccionados libremente. (1)
+	- Agregar charts de varias dificultades a la vez, con distintos tempos y start 			points. (1)
+	- Agregar carga de chart existente por dificultad según input del usuario. (1)
+	- Permitir desplazar elementos siguiendo el bpm tal y como se ajusta. 	(1)
+	- Poder borrar canciones. (1)
+
+4. Agregar Nuevas Funcionalidades al Juego (1) [9/9]
+
+Game: (1) [9/9]
+	- Crear Room copia de Game, pero para PC. (1)
+	- Agregar modo práctica con checkpoints. (1)
+	- Agregar jugabilidad y puntaje basado en precisión. (1)
+	- Permitir regular el volumen de la canción (en juego y editor). (1)
+	- Compatibilidad con controles de Nintendo Switch. (1)
+	- Sistema de guardado. (1)
+	- Agregar manejo de dificultades. (1)
+	- Permitir exportar archivos de una canción nueva con la carpeta y subcarpetas 		necesarias. (1)
+	- Permitir cargar canción ya hecha con chart, nombre y canción desde una 			carpeta externa. (1)

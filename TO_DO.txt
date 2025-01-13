@@ -1,0 +1,57 @@
+TO DO
+
+Game.
+- Crear sprites de botones para PC. 
+- Crear Room copia de Game, pero para PC.
+- Mejorar resolución sprites
+- Agregar modo practica con checkpoint
+- Agregar jugabilidad y puntaje según precisión
+- Quitar is_playing si el indice es 0.
+- Permitir regular volumen de la canción (Al jugar y en editor).
+- Sistema de guardado
+- Compatibilidad con control de switch
+- Mejorar orden del codigo
+- Agregar manejo de dificultades
+- Manejo para idioma: EN y ES.
+- Arreglar colores
+
+Chart Game (crear/editar charteos).
+- Mejorar interfaz y feedback
+- Sincronizar música con la barra.
+- Solo agrega elementos si click debajo de donde pone x: base_x
+- Mejorar mensaje del Ctrl+Supr para borrar todo
+- Agregar que con la rueda del raton se mueve levemente la barra.
+- Hacer que el ancho del sprite del chart sea dinamico.
+- Hacer que si el ancho * 4 no llena la pantalla, cree más instancias hasta llenarla * 2. Cada vez actualiza.
+- Mejorar acceso a los controles y hacerlo más ordenado y claro.
+- No pueden haber 2 elementos sobre uno que ya este agregado.
+- Si se hace click izquierdo sobre un elemento seleccionado, permite moverlo libremente dentro de lo visible en la pantalla.
+- Quitar borrar al darle click derecho justo encima
+- Arreglar coordenada x selected
+- Mejorar checkpoint y auto checkpoint, tal de que aparezca en la coordenada de la segunda barra (la 1).
+- Al desactivar checkpoint toggle, quita que al reiniciar con R inicia dandole play
+- Indicar número de notas
+- Agregar charts de varias dificultades a la vez (sin salir del editor para cambiar), distintos tempos y start point.
+- Agregar carga de chart existente de cierta dificultad segun input del usuario
+- Arreglar A/D y W/S al mover elementos, borrarlos y re-agregarlos
+- Si click fuera del espacio de la barra, saca la seleccion sin añadir elemento
+
+
+Chart Game (sistema de archivos).
+- Mejorar mensajes
+- Hacer mensajes en EN y en ES.
+- Hacer mas dialog y mejorar diseño para los mensajes de feedback
+- Actualizar bien la canción a actualizar
+- Manejo para dificultades
+
+Chart Game (Canción nueva).
+- Mejorar mensajes
+- Hacer mensajes en EN y en ES.
+- Hacer mas dialog y mejorar diseño para los mensajes de feedback
+- Actualizar bien la canción a reemplazar
+- Añadir aviso sobre agregar canción
+- Hacer que el formato deba ser el indicado, del nombre de canción
+- Al crear canción permite probarla sin necesidad de salir a otra.
+- Manejo para dificultades
+- Permitir exportar archivos de una de una canción nueva si se desea, crea carpeta y sub carpetas necesarias, desde fuera del editor
+- Permite cargar cancion ya hecha con chart, nombre y cancion, si se da la carpeta donde buscar. y no es necesario entrar al editor
