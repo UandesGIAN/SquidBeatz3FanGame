@@ -4,10 +4,9 @@
 if (global.new_song_id == undefined || global.new_song_name == "") {
 	switch (global.current_difficulty) {
 		case "easy":
-			if ((keyboard_check_pressed(ord("L")) || !already_check_load) &&
-				(array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) == 0 &&
+			if ((keyboard_check_pressed(ord("L")) || (!already_check_load && array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) == 0)) &&
 				(array_length(global.charts.normal.charts[global.current_chart_index]) > 0 ||
-				array_length(global.charts.hard.charts[global.current_chart_index]) > 0) )) {
+				array_length(global.charts.hard.charts[global.current_chart_index]) > 0)) {
 				load_shown = !load_shown;
 				obj_chart_game.message_shown = 1;
 				obj_chart_game2.message_shown = 1;
@@ -15,15 +14,14 @@ if (global.new_song_id == undefined || global.new_song_name == "") {
 				already_check_load = 1;
 			} else {
 				if ((keyboard_check_pressed(ord("L")))) {
-					show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if it contains elements and the current one does not have any, even outside the editor." : "Sólo es posible cargar un charteo anterior si alguno tiene elementos y si el actual no tiene ninguno, ya habiendo guardado.");
+					show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if there's a previous difficulty with a chart" : "Sólo es posible cargar un charteo anterior si alguno tiene elementos.");
 				}
 			}
 			break;
 		case "normal":
-			if ((keyboard_check_pressed(ord("L")) || !already_check_load) &&
-				(array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) == 0 &&
+			if ((keyboard_check_pressed(ord("L")) || (!already_check_load && array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) == 0)) &&
 				(array_length(global.charts.easy.charts[global.current_chart_index]) > 0 ||
-				array_length(global.charts.hard.charts[global.current_chart_index]) > 0) )) {
+				array_length(global.charts.hard.charts[global.current_chart_index]) > 0)) {
 				load_shown = !load_shown;
 				already_check_load = 1;
 				obj_chart_game.message_shown = 1;
@@ -31,15 +29,14 @@ if (global.new_song_id == undefined || global.new_song_name == "") {
 				obj_editor_button.blocked = 1;
 			} else {
 				if ((keyboard_check_pressed(ord("L")))) {
-					show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if it contains elements and the current one does not have any, even outside the editor." : "Sólo es posible cargar un charteo anterior si alguno tiene elementos y si el actual no tiene ninguno, ya habiendo guardado.");
+					show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if there's a previous difficulty with a chart" : "Sólo es posible cargar un charteo anterior si alguno tiene elementos.");
 				}
 			}
 			break;
 		case "hard":
-			if ((keyboard_check_pressed(ord("L")) || !already_check_load) &&
-				(array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) == 0 &&
+			if ((keyboard_check_pressed(ord("L")) ||  (!already_check_load && array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) == 0)) &&
 				(array_length(global.charts.easy.charts[global.current_chart_index]) > 0 ||
-				array_length(global.charts.normal.charts[global.current_chart_index]) > 0) )) {
+				array_length(global.charts.normal.charts[global.current_chart_index]) > 0)) {
 				load_shown = !load_shown
 				obj_chart_game.message_shown = 1;
 				obj_chart_game2.message_shown = 1;
@@ -47,14 +44,14 @@ if (global.new_song_id == undefined || global.new_song_name == "") {
 				already_check_load = 1;
 			} else {
 				if ((keyboard_check_pressed(ord("L")))) {
-					show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if it contains elements and the current one does not have any, even outside the editor." : "Sólo es posible cargar un charteo anterior si alguno tiene elementos y si el actual no tiene ninguno, ya habiendo guardado.");
+					show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if there's a previous difficulty with a chart" : "Sólo es posible cargar un charteo anterior si alguno tiene elementos.");
 				}
 			}
 			break;
 	}
 } else {
 	if ((keyboard_check_pressed(ord("L")))) {
-		show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart if it contains elements and the current one does not have any, even outside the editor." : "Sólo es posible cargar un charteo anterior si alguno tiene elementos y si el actual no tiene ninguno, ya habiendo guardado.");
+		show_message(global.current_language == "ENGLISH" ? "It is only possible to load a previous chart after saving the new song." : "Sólo es posible cargar un charteo anterior tras guardar la nueva canción.");
 	}
 }
 
@@ -130,12 +127,14 @@ if (message_shown) {
 					var d = diff[k];
 					
 					array_push(global.charts[$ d].charts, []);
-					array_push(global.charts[$ d].tempo, 120);
-					array_push(global.charts[$ d].start_point, 0);
+					array_push(global.charts[$ d].tempo, global.tempo);
+					array_push(global.charts[$ d].start_point, global.start_point);
 				
 					array_push(global.game_points[$ d].count_silver, 0);
 					array_push(global.game_points[$ d].count_gold, 0);
 					array_push(global.game_points[$ d].total_hits, 0);
+					
+					array_push(global.wins_lifebar[$ d], 0);
 				}
 			} else {
 				if (global.current_language == "ENGLISH") show_message("Error trying to save chart.")
@@ -148,7 +147,6 @@ if (message_shown) {
 			save_chart_at_gamefiles();
 			load_single_song();
 			
-			obj_handle_savedata.save_ini_data();
 			obj_chart_game.message_shown = 0;
 			obj_chart_game2.message_shown = 0;
 			obj_editor_button.blocked = 0;

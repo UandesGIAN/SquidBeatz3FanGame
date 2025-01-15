@@ -15,8 +15,8 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 			if (array_length(elements) > 0 && current_element_index < array_length(elements)) {
 			    var element = elements[current_element_index];
 			    var sprite = type_spr[element.index_type];
-			    var sprite_x_start = element.pos_x - global.base_x + 25 + (element.index_type == 1 || element.index_type == 3 ? 10: 0) + (element.index_type > 3 ? 7 : 0);
-			    var sprite_x_end = sprite_x_start + sprite_get_width(sprite) - 25 + (element.index_type > 3 ? 30 : 0);
+			    var sprite_x_start = element.pos_x - global.base_x + 28 + (element.index_type == 1 || element.index_type == 3 ? 10: 0) + (element.index_type > 3 ? 7 : 0) + (element.index_type == 6 ? 8 : 0) - (element.index_type == 7 ? 5 : 0);
+			    var sprite_x_end = sprite_x_start + sprite_get_width(sprite) + (element.index_type > 3 ? 10 : 0);
 				
 				// Inicializar variables para el estado de reproducción
 				var abxy_pressed = false;
@@ -136,7 +136,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 						if (sprite_x_start < x) error = abs(sprite_x_end - 272) / (sprite_width);
 						show_debug_message("error" + string(error) + " start: " + string(sprite_x_start));	
 				
-						if ((error <= 0.65 && error > 0.2) || error > 0.93 && input_sync_type == element.index_type) {
+						if ((error <= 0.65 && error > 0.2) || error > 0.94 && input_sync_type == element.index_type) {
 							show_debug_message("GOOD");
 							local_count_silver++;
 							type_of_hit = 2;
@@ -156,7 +156,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 								else current_life += 5;
 								if (current_life >= 100) current_life = 100;
 							}
-						} else if (error > 0.65 && error < 0.93 && input_sync_type == element.index_type) {
+						} else if (error > 0.65 && error <= 0.94 && input_sync_type == element.index_type) {
 							show_debug_message("FRESH");
 							local_count_gold++;
 							type_of_hit = 3;
@@ -224,7 +224,6 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 							if (local_count_silver >= global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index]) global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index] = local_count_silver;
 							if (local_count_gold >= global.game_points[$ global.current_difficulty].count_gold[global.current_chart_index]) global.game_points[$ global.current_difficulty].count_gold[global.current_chart_index] = local_count_gold;
 							global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] = local_total_hits;
-							obj_handle_savedata.save_ini_data();
 						}
 						current_element_index++;
 						text_timer = current_time;
@@ -234,7 +233,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 						hit_timer = current_time;
 					}
 				} else {
-					if ((current_time - start_delay) > 100 && (sprite_x_end < x) || (count_lr > 0 && count_abxy > 0 && input_sync_type == -1)) {
+					if (((current_time - start_delay) > 100 && (sprite_x_end < x) || (count_lr > 0 && count_abxy > 0 && input_sync_type == -1)) && obj_play.play_music) {
 						current_element_index++;
 						show_debug_message("MISS");
 						type_of_hit = 0;
@@ -254,7 +253,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 				input_sync_type = -1;
 			}
 	
-			if ((obj_game2.total_notes == local_total_hits || global.lifebar && current_element_index == array_length(elements) && !global.wins_lifebar[$ global.current_difficulty][global.current_chart_index]) && (!global.practice_mode && !auto_bot_enabled)) {
+			if (song_end_delay == -1 && (obj_game2.total_notes == local_total_hits || (global.lifebar && !global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) && current_element_index == array_length(elements) && (!global.practice_mode && !auto_bot_enabled)) {
 				if ((array_length(elements) - global.game_points[$ global.current_difficulty].count_gold[global.current_chart_index]) == 0) {
 			        if (last_win_category != "gold") {
 			            game_win = 1;
@@ -263,7 +262,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 			        last_win_category = "gold"; // Actualizar la categoría ganada
 			    }
 			    // Verificar si ganó en la categoría Bronze
-			    else if ((array_length(elements) - global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index]) == 0 || (global.lifebar && current_element_index == array_length(elements) && !global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) {
+			    else if ((array_length(elements) - global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index]) == 0 || (global.lifebar && !global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) {
 					if (last_win_category != "bronze") {
 			            game_win = 1;
 			            game_win_for_first_time = 1;
@@ -282,9 +281,10 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 			        last_win_category = "silver"; // Actualizar la categoría ganada
 			    }
 				obj_play.animation_start_time = current_time;
-				local_total_hits = 0;
 				obj_handle_savedata.save_ini_data();
 			}
+			
+			if (current_element_index == array_length(elements) && song_end_delay == -1) song_end_delay = current_time;
 		}
 	} else {
 		if (keyboard_check(vk_control) && keyboard_check(vk_alt) && keyboard_check(ord("B")) && keyboard_check_pressed(ord("N"))) {
@@ -297,6 +297,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 			local_total_hits = 0;
 		}
 		current_element_index = 0;
+		song_end_delay = -1;
 		start_delay = current_time;
 		type_of_hit = -1;
 		combo_count = 0;

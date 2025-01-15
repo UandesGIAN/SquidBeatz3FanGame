@@ -6,13 +6,19 @@ if (((keyboard_check_pressed(vk_space) && !global.is_gamepad) || (global.is_game
     if (sprite_index == spr_pause) {
         sprite_index = spr_play;
 		
-		var tiempo_inicio = 0;
-		if (global.practice_mode) {
-            tiempo_inicio = ((global.start_point + global.base_x) / (global.tempo * (132 / 60)));
-        }
-		audio_sound_set_track_position(global.current_song, tiempo_inicio);
-		sound_playing = audio_play_sound(global.current_song, 1, 0);
-		play_music = 1;
+		if (!global.practice_mode || global.practice_mode && global.base_x - 200 < (audio_sound_length(global.current_song) * (global.tempo * 132/60)) - global.start_point) {
+			var tiempo_inicio = 0;
+			if (global.practice_mode) {
+	            tiempo_inicio = ((global.start_point + global.base_x) / (global.tempo * (132 / 60)));
+				obj_sync.local_count_silver = 0;
+				obj_sync.local_count_gold = 0;
+				obj_sync.local_total_hits = 0;
+				obj_sync.combo_count = 0;
+	        }
+			audio_sound_set_track_position(global.current_song, tiempo_inicio);
+			sound_playing = audio_play_sound(global.current_song, 1, 0);
+			play_music = 1;
+		}
     }
     else if (sprite_index == spr_play) {
         sprite_index = spr_pause;
@@ -78,11 +84,10 @@ if (!play_music && ((keyboard_check_pressed(vk_left) || keyboard_check_pressed(v
 		obj_game.total_hits_checkpoint = 0;
 		obj_game.cei_1_checkpoint = 0;
 	}
-	global.practice_mode = 0;
-	
 	
 	stick_moved = 1;
 	obj_sync.game_win_for_first_time = 0;
+	obj_sync.last_win_category = "";
 	if ((array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0) || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index])) 
 		obj_sync.game_win = 1;
 	else
@@ -119,13 +124,13 @@ if (!play_music && ((keyboard_check_pressed(vk_right) || keyboard_check_pressed(
 		obj_game.total_hits_checkpoint = 0;
 		obj_game.cei_1_checkpoint = 0;
 	}
-	global.practice_mode = 0;
 	
 	global.tempo = global.charts[$ global.current_difficulty].tempo[global.current_chart_index];
 	global.start_point = global.charts[$ global.current_difficulty].start_point[global.current_chart_index];
 	
 	stick_moved = 1;
 	obj_sync.game_win_for_first_time = 0;
+	obj_sync.last_win_category = "";
 	if ((array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0) || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index]))
 		obj_sync.game_win = 1;
 	else
@@ -158,11 +163,11 @@ if (keyboard_check_pressed(vk_shift) && !global.is_gamepad) {
 // Volume control
 if (keyboard_check_pressed(vk_subtract) && !keyboard_check(vk_control) && global.current_song != undefined) {
 	volume_count -= 0.2;
-    audio_sound_gain(global.current_song, max(0, volume_count), 0);
+	audio_set_master_gain(0, max(0, volume_count));
 }
 if (keyboard_check_pressed(vk_add) && !keyboard_check(vk_control) && global.current_song != undefined) {
 	volume_count += 0.2;
-    audio_sound_gain(global.current_song, min(volume_count, 2), 0);
+	audio_set_master_gain(0, min(volume_count, 2));
 }
 // Sound delay control
 if (keyboard_check_pressed(vk_subtract) && keyboard_check(vk_control)) {
@@ -190,10 +195,19 @@ if (keyboard_check(vk_control) && keyboard_check_pressed(ord("O")) && !global.is
             if (ret <= 0) {
                 show_message(global.current_language == "ENGLISH" ? "An error occurred while extracting the .zip file." : "Ocurrió un error al extraer el archivo .zip.");
             }
-                
-            load_songs_from_directory(working_directory + "load_songs\\sounds");
-            directory_destroy(working_directory + "load_songs");
-			
+			var start_wait = current_time;
+			while (current_time - start_wait < 5000) {
+				if (file_exists(working_directory + "load_songs\\sounds\\song_titles.json")) {
+					start_wait = 0;
+					break;
+				}
+			}
+			if (!file_exists(working_directory + "load_songs\\sounds\\song_titles.json")) {
+				show_message(global.current_language == "ENGLISH" ? "An error occurred while extracting the .zip file." : "Ocurrió un error al extraer el archivo .zip.");
+			} else {
+				load_songs_from_directory(working_directory + "load_songs\\sounds");
+				directory_destroy(working_directory + "load_songs");
+			}
         } else {
             show_message(global.current_language == "ENGLISH" ? "The selected file is not valid. Please select a compatible .zip file." : "El archivo seleccionado no es válido. Por favor, selecciona un archivo .zip compatible.");
         }
@@ -231,24 +245,18 @@ if (keyboard_check(vk_control) && !global.is_gamepad && keyboard_check_pressed(o
 if (keyboard_check(vk_control) && !global.is_gamepad && keyboard_check_pressed(ord("S")) && !global.practice_mode) {
     show_message(global.current_language == "ENGLISH" ? "SAVE PROGRESS DATA\n\nYou will now be prompted to save a file containing information about each song, your score, and any changes you’ve made to the settings. To load this file, you must do so from the settings menu using the mouse and keyboard.\nIf you wish to back up your data and game files, you must export the songs first and then load the save file. This is because, for the data to load, the song chart in the save file and in the game files are compared, if they match, the data is loaded; else, it is not.\n\n" : "GUARDAR DATOS DE PROGRESO\n\nA continuación se te pedirá que guardes un archivo de guardado con información de cada canción, tu puntaje y los cambios que hayas realizado en los ajustes. Para cargar este archivo debes hacerlo desde los ajustes y usando el mouse y teclado.\nSi deseas guardar una copia de seguridad de tus datos y los archivos del juego, debes exportar las canciones primero, luego cargar el archivo de guardado, pues para que se carguen los datos, se comparan los datos de charteo en el archivo de guardado y en los archivos del juego, si coinciden, se cargan los datos, si no, no.");
     
-	if (1 == show_question(global.current_language == "ENGLISH" ? "Do you want to REPLACE the file with data AT the game files?\nIf you choose no, you will be prompted to create a .ini file to save the game data." : "¿Deseas REEMPLAZAR el archivo de guardado EN los archivos del juego?\nSi eliges que no, se te pedirá que crees un archivo .ini donde guardar los datos del juego.")) {
-		obj_handle_savedata.save_ini_data();
-		show_message(global.current_language == "ENGLISH" ?  "Game data saved successfully." : "Datos de guardado exportados éxitosamente.")
-	} else {
-		// Abrir explorador de archivos para guardar
-	    var filter = "*.ini|*.*";
-	    var file_name = get_save_filename(filter, "save_data.ini");
+	// Abrir explorador de archivos para guardar
+	var filter = "*.ini|*.*";
+	var file_name = get_save_filename(filter, "save_data.ini");
 	
-		if (string_length(file_name) > 0) {
-			if (string_pos(".ini", file_name)) {
-				obj_handle_savedata.save_ini_data(file_name);
-				show_message(global.current_language == "ENGLISH" ?  "Game data saved successfully at " + string(file_name) + "." : "Datos de guardado exportados éxitosamente en " + string(file_name) + ".")
-			} else {
-				show_message(global.current_language == "ENGLISH" ? "The selected file is invalid. Please select a file with the .ini extension." : "El archivo seleccionado no es válido. Por favor, selecciona un archivo con la extensión .ini.");
-			}
+	if (string_length(file_name) > 0) {
+		if (string_pos(".ini", file_name)) {
+			obj_handle_savedata.save_ini_data(file_name);
+			show_message(global.current_language == "ENGLISH" ?  "Game data saved successfully at " + string(file_name) + "." : "Datos de guardado exportados éxitosamente en " + string(file_name) + ".")
 		} else {
-			show_message(global.current_language == "ENGLISH" ? "No file was created." : "No se creó ningún archivo.");
+			show_message(global.current_language == "ENGLISH" ? "The selected file is invalid. Please select a file with the .ini extension." : "El archivo seleccionado no es válido. Por favor, selecciona un archivo con la extensión .ini.");
 		}
+	} else {
+		show_message(global.current_language == "ENGLISH" ? "No file was created." : "No se creó ningún archivo.");
 	}
-
 }

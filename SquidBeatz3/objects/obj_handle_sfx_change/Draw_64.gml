@@ -45,8 +45,8 @@ if (message_shown && current_time - inputs_delay > 100) {
 
     // Títulos y sprites
     var row_headers = ["SFX", "DEFAULT", "USER1", "USER2"];
-    var row_actions = ["EDIT", "", "CHANGE", "CHANGE"];
-	if (global.current_language == "CASTELLANO") row_actions = ["EDITAR", "", "CAMBIAR", "CAMBIAR"];
+    var row_actions = ["EDIT", "", "REPLACE", "REPLACE"];
+	if (global.current_language == "CASTELLANO") row_actions = ["EDITAR", "", "REEMPLAZAR", "REEMPLAZAR"];
     var sprites = [spr_lr, spr_lr2, spr_abxy];
     var button_text = "Play";
 	if (global.current_language == "CASTELLANO") button_text = "Escuchar";
@@ -152,7 +152,11 @@ if (message_shown && current_time - inputs_delay > 100) {
 
             if (row == 0) {
                 // Primera fila: dibujar sprites
+				shader_set(shader_hue_shift);
+				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+
                 draw_sprite(sprites[col], 0, x_local - 15, y_local - 25);
+				shader_reset();
             } else {
                 // Otras filas: dibujar botones
                 draw_set_color(color_cell_bg);

@@ -19,7 +19,7 @@ if (type_of_hit != -1 && current_element_index > 0) {
             alpha = 0.8; // Totalmente transparente
             break;
     }
-	if (current_element_index < array_length(elements)) {
+	if (current_element_index >= 0 && current_element_index < array_length(elements)) {
 		if (elements[current_element_index-1].index_type <= 1) {  // L_R
 		    rect_color = global.primary_color_yellow;
 		} else if (elements[current_element_index-1].index_type > 1 && elements[current_element_index-1].index_type <= 3) {  // ABXY

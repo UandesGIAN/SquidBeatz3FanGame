@@ -32,29 +32,54 @@ if (global.current_song != undefined) {
 					audio_stop_all();
                     break;
             }
-        } else {
-            global.is_playing = 1;  // Iniciar juego
+			
 			if (!global.practice_mode) {
-	            if (!obj_play.play_music) {
-		                global.base_x = global.start_point + global.sound_delay*10;
-		                obj_game.game_bar[0].x = global.start_point;
-		                obj_game.conteo_desplazamiento = 0;
-		                obj_game.index_bar = 0;
-	            } else {
-	                // Ajustar base_x, inicio_x y las posiciones iniciales de las barras
-	                var inicio_x = ((audio_sound_get_track_position(obj_play.sound_playing) * (global.tempo * proportion_bpm_to_speed * 60)) - global.start_point)
-	                var conteo_desplazamiento = inicio_x div 528;
-	                var index_bar = 0;
-	                global.base_x = -inicio_x + obj_game.sprite_width * conteo_desplazamiento + global.sound_delay*10;
-	                obj_game.game_bar[index_bar].x = -inicio_x;
-	                for (var i = 1; i < 4; i++) {
-	                    var next_index = (index_bar + i) mod 4;
-	                    var prev_index = (index_bar + i - 1) mod 4;
-	                    obj_game.game_bar[next_index].x = obj_game.game_bar[prev_index].x + obj_game.sprite_width;
-	                }
-	                obj_game.started = 1;
-	            }
+				obj_sync.game_win_for_first_time = 0;
+				obj_sync.last_win_category = "";
+				if ((array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) - global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] == 0) || (global.lifebar && global.wins_lifebar[$ global.current_difficulty][global.current_chart_index]))
+					obj_sync.game_win = 1;
+				else
+					obj_sync.game_win = 0;
 			} else {
+				global.base_x = global.start_point + global.sound_delay*10;
+				
+				obj_game.conteo_desplazamiento = 0;
+		        obj_game.index_bar = 0;
+		        obj_game.game_bar[0].x = global.start_point;
+				// Recalcular las posiciones de las barras
+			    for (var i = 1; i < 4; i++) {
+			        var next_index = (obj_game.index_bar + i) mod 4;
+			        var prev_index = (obj_game.index_bar + i - 1) mod 4;
+			        obj_game.game_bar[next_index].x = obj_game.game_bar[prev_index].x + obj_game.sprite_width;
+			    }
+	            obj_game.started = 1;
+			}
+        } else {
+			if (!global.practice_mode && obj_play.play_music) {
+				obj_play.sprite_index = spr_pause;
+				audio_stop_sound(global.current_song);
+				obj_play.play_music = 0;
+				obj_play.sound_playing = -1;
+				obj_game2.processed_elements = [];
+				
+				global.is_playing = 1;  // Iniciar juego
+				obj_play.sprite_index = spr_play;
+				obj_play.sound_playing = audio_play_sound(global.current_song, 1, 0);
+				obj_play.play_music = 1;
+		        global.base_x = global.start_point + global.sound_delay*10;
+				
+				obj_game.conteo_desplazamiento = 0;
+		        obj_game.index_bar = 0;
+		        obj_game.game_bar[0].x = global.start_point;
+				// Recalcular las posiciones de las barras
+			    for (var i = 1; i < 4; i++) {
+			        var next_index = (obj_game.index_bar + i) mod 4;
+			        var prev_index = (obj_game.index_bar + i - 1) mod 4;
+			        obj_game.game_bar[next_index].x = obj_game.game_bar[prev_index].x + obj_game.sprite_width;
+			    }
+	            obj_game.started = 1;
+			} else {
+				global.is_playing = 1;  // Iniciar juego
 				if (!obj_play.play_music && obj_game.checkpoint_start != -1) {
 					global.base_x = obj_game.checkpoint_base_x; // Restaurar base_x guardada
 			        if (obj_game.checkpoint_base_x > 0) obj_game.game_bar[0].x = obj_game.checkpoint_start - obj_game.sprite_width;

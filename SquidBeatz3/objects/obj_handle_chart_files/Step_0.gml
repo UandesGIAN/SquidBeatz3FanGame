@@ -3,6 +3,7 @@
 
 // Desde el editor, si se presiona ctrl+O se permite cargar un chart desde un archivo JSON compatible
 if (keyboard_check(vk_control) && keyboard_check_pressed(ord("O"))) {
+	show_message(global.current_language == "ENGLISH" ? "WARNING: Opening a chart .JSON file will load the CURRENT DIFFICULTY's chart, be sure to be at the right difficulty to load. You can use the Load previous to load a chart from another difficulty." : "ADVERTENCIA: Abrir un archivo .JSON de un chart cargará el charteo de la DIFICULTAD ACTUAL. Asegúrate de estar en la dificultad correcta antes de cargar. Puedes usar la opción Cargar previo para cargar un charteo de otra dificultad.");
 	var char_data = load_chart_from_file();
 	if (char_data != undefined) {
 		global.tempo = char_data[$ global.current_difficulty].tempo;

@@ -39,7 +39,9 @@ combo_count = 0;
 type_of_hit = 0;
 missed_or_pressed_type = 0;
 
+start_delay = current_time;
 last_input_time = current_time;
+song_end_delay = -1;
 last_win_category = ""
 text_timer = current_time;
 animation_timer = current_time;

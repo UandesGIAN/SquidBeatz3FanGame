@@ -292,9 +292,9 @@ function load_sfx(dir_path=working_directory+"sounds\\sfx\\") {
 		
 	    if (file_exists(file_path)) {
 	        sound_id = audio_create_stream(file_path); // Create an audio stream to access the file
-			if (i == 0 || i == 3) global.sound_effects[i % 3][0] = sound_id;
-		    else if (i == 1 || i == 4) global.sound_effects[2][1] = sound_id;
-		    else if (i == 2 || i == 5) global.sound_effects[2][2] = sound_id;
+			if (i == 0 || i == 3) global.sound_effects[i < 3 ? 1 : 2][0] = sound_id;
+		    else if (i == 1 || i == 4) global.sound_effects[i < 3 ? 1 : 2][1] = sound_id;
+		    else if (i == 2 || i == 5) global.sound_effects[i < 3 ? 1 : 2][2] = sound_id;
 	    } else {
 	        show_debug_message((global.current_language == "ENGLISH" ? "No file found " : "No existe el archivo ") + string(file_path));
 	    }
@@ -313,8 +313,8 @@ function load_bg(dir_path=working_directory+"sprites\\") {
 	    // If a valid file is selected
 	    if (file_exists(file_path)) {
 				sprite_id = sprite_add(file_path, 0, 0, 0, 0, 0);
-				if (i == 0 || i == 1) global.bg_options[2] = sound_id;
-				if (i == 2 || i == 3) global.bg_options[3] = sound_id;
+				if (i == 0 || i == 1) global.bg_options[2] = sprite_id;
+				if (i == 2 || i == 3) global.bg_options[3] = sprite_id;
 	    } else {
 	        show_debug_message((global.current_language == "ENGLISH" ? "No file found " : "No existe el archivo ") + string(file_path));
 	    }

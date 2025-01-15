@@ -145,7 +145,7 @@ if (obj_sync.game_win_for_first_time && total_elements > 0) {
         draw_set_alpha(1);
     }
 } else {
-	if (obj_sync.game_win && total_elements > 0) {
+	if (obj_sync.game_win && total_elements > 0 && global.is_playing) {
 		if (total_elements == global.game_points[$ global.current_difficulty].count_gold[global.current_song_index]) {
 			if (global.octo_icons) draw_sprite(spr_gold_octo, 0, x+80, y);
 			else draw_sprite(spr_gold, 0, x+80, y)
@@ -160,7 +160,7 @@ if (obj_sync.game_win_for_first_time && total_elements > 0) {
 }
 
 if (play_music) {
-    if (current_time - prev_frame_timer > (current_sprite == spr_dance6 || current_sprite == spr_dance8 ? 34 : 31) && obj_sync.current_life > 0) {
+    if (current_time - prev_frame_timer > (current_sprite == spr_dance6 || current_sprite == spr_dance8 ? 34 : 31) && obj_sync.current_life > 0 && obj_sync.current_element_index < array_length(obj_sync.elements)) {
 		animation_timer++;
 		prev_frame_timer = current_time;
 	}

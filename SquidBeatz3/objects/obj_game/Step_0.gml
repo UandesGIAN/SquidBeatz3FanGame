@@ -1,7 +1,8 @@
 /// @description Insert description here
 // You can write your code in this editor
 
-if (id == game_bar[0] && global.is_playing) {
+if (id == game_bar[0] && global.is_playing && global.current_song != undefined) {
+	var final_x = (audio_sound_length(global.current_song) * (global.tempo * proportion_bpm_to_speed * 60)) - global.start_point;
 	if (obj_play.play_music) {
 		// Cuando ya esta sonando y le da a jugar de pronto
 		if (audio_sound_get_track_position(obj_play.sound_playing) > 0 && !started) {
@@ -26,7 +27,7 @@ if (id == game_bar[0] && global.is_playing) {
 		}
 		
 		// AUTOMATICO
-		if (((obj_sync.current_life > 0 && global.lifebar) || !global.lifebar)) {
+		if (((obj_sync.current_life > 0 && global.lifebar) || !global.lifebar) && (obj_sync.song_end_delay == -1 || current_time - obj_sync.song_end_delay < 3700 || (global.practice_mode && global.base_x - 200 < final_x))) {
 			with(obj_game) {
 				x += -global.tempo*proportion_bpm_to_speed;	// Desplazamiento a la izquierda de todas las barras
 			}
@@ -91,7 +92,10 @@ if (id == game_bar[0] && global.is_playing) {
 			started = 1;
 		} else {
 			// MODO MANUAL PARA MODO PRACTICA EN PAUSA
-			
+			obj_sync.hit_timer = current_time;
+			obj_sync.pos_y_hit = [];
+			obj_sync.pos_x_hit = [];
+			obj_sync.alpha_hit = [];
 			// Busca cual es el current element index para el proximo hit
 			for (var j = 0; j < array_length(obj_sync.elements); j++) {
 				var ele = obj_sync.elements[j];
@@ -101,12 +105,17 @@ if (id == game_bar[0] && global.is_playing) {
 					} else {
 						obj_sync.current_element_index = j;
 					}
-					obj_sync.local_count_silver = 0;
-					obj_sync.local_count_gold = 0;
-					obj_sync.local_total_hits = 0;
-					obj_sync.combo_count = 0;
 					break;
 				}
+			}
+			if (obj_sync.current_element_index < 0) obj_sync.current_element_index = 0;
+			
+			if (global.base_x -300 >= final_x) {
+				obj_play.sprite_index = spr_pause;
+				audio_stop_sound(global.current_song);
+				obj_play.play_music = 0;
+				obj_play.sound_playing = -1;
+				obj_game2.processed_elements = [];
 			}
 			
 			if (mouse_check_button(mb_middle) && !global.is_gamepad && !has_changed) {
@@ -121,6 +130,7 @@ if (id == game_bar[0] && global.is_playing) {
 			    if (dif != 0) {
 			        show_debug_message("START MANUAL  | x:  " + string(game_bar[index_bar].x) + " | xprev: " + string(xprev) + " | Index: " + string(index_bar) + " | Conteo: " + string(conteo_desplazamiento));
 			        game_bar[index_bar].x = xprev + dif;
+					
 			        show_debug_message("START MANUAL NEW  | x:  " + string(game_bar[index_bar].x) + " | xprev: " + string(xprev) + " | Index: " + string(index_bar) + " | Conteo: " + string(conteo_desplazamiento));
 			        for (var i = 1; i < 4; i++) {
 			            var next_index = (index_bar + i) mod 4;
@@ -130,11 +140,13 @@ if (id == game_bar[0] && global.is_playing) {
 
 			        // Si se sale de la pantalla por la izquierda
 			        if (dif < 0 && game_bar[index_bar].x + sprite_width < 0) {
-			            game_bar[index_bar].x = game_bar[(index_bar + 3) mod 4].x + sprite_width;
-			            index_bar = (index_bar + 1) mod 4;
-			            conteo_desplazamiento += 1;
-			            show_debug_message("LEFT  | x:  " + string(game_bar[index_bar].x) + " | xprev: " + string(xprev) + " | Index: " + string(index_bar) + " | Conteo: " + string(conteo_desplazamiento));
-			            has_changed = 1;
+						if (global.base_x < final_x) {
+				            game_bar[index_bar].x = game_bar[(index_bar + 3) mod 4].x + sprite_width;
+				            index_bar = (index_bar + 1) mod 4;
+				            conteo_desplazamiento += 1;
+				            show_debug_message("LEFT  | x:  " + string(game_bar[index_bar].x) + " | xprev: " + string(xprev) + " | Index: " + string(index_bar) + " | Conteo: " + string(conteo_desplazamiento));
+				            has_changed = 1;
+						}
 			        }
 			        // Si se sale de la pantalla por la derecha
 			        if (dif > 0 && game_bar[index_bar].x > 0 && conteo_desplazamiento > 0) {
@@ -149,7 +161,7 @@ if (id == game_bar[0] && global.is_playing) {
 
 			// Control de la rueda del ratón
 			if (mouse_wheel_up() && !global.is_gamepad) {
-			    game_bar[index_bar].x += 1;
+			    game_bar[index_bar].x += 10;
 				for (var i = 1; i < 4; i++) {
 			        var next_index = (index_bar + i) mod 4;
 			        var prev_index = (index_bar + i - 1) mod 4;
@@ -158,7 +170,7 @@ if (id == game_bar[0] && global.is_playing) {
 			}
 
 			if (mouse_wheel_down() && !global.is_gamepad) {
-			    game_bar[index_bar].x -= 1;
+			    game_bar[index_bar].x -= 10;
 				for (var i = 1; i < 4; i++) {
 				    var next_index = (index_bar + i) mod 4;
 				    var prev_index = (index_bar + i - 1) mod 4;
@@ -190,11 +202,13 @@ if (id == game_bar[0] && global.is_playing) {
 
 			        // Manejo de salida por la izquierda
 			        if (dif < 0 && game_bar[index_bar].x + sprite_width < 0) {
-			            game_bar[index_bar].x = game_bar[(index_bar + 3) mod 4].x + sprite_width;
-			            index_bar = (index_bar + 1) mod 4;
-			            conteo_desplazamiento += 1;
-			            show_debug_message("LEFT OUT  | x:  " + string(game_bar[index_bar].x) + " | Index: " + string(index_bar) + " | Conteo: " + string(conteo_desplazamiento));
-			            has_changed = 1;
+						if (global.base_x - 200 < final_x) {
+				            game_bar[index_bar].x = game_bar[(index_bar + 3) mod 4].x + sprite_width;
+				            index_bar = (index_bar + 1) mod 4;
+				            conteo_desplazamiento += 1;
+				            show_debug_message("LEFT OUT  | x:  " + string(game_bar[index_bar].x) + " | Index: " + string(index_bar) + " | Conteo: " + string(conteo_desplazamiento));
+				            has_changed = 1;
+						}
 			        }
 
 			        // Manejo de salida por la derecha

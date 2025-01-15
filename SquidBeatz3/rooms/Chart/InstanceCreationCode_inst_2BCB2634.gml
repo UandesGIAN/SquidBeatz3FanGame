@@ -5,6 +5,7 @@ action = function() {
 	obj_chart_game.message_shown = 1;
 	obj_chart_game2.message_shown = 1;
 	obj_editor_button.blocked = 1;
+	show_message(global.current_language == "ENGLISH" ? "WARNING: Opening a chart .JSON file will load the CURRENT DIFFICULTY's chart, be sure to be at the right difficulty to load. You can use the Load previous to load a chart from another difficulty." : "ADVERTENCIA: Abrir un archivo .JSON de un chart cargará el charteo de la DIFICULTAD ACTUAL. Asegúrate de estar en la dificultad correcta antes de cargar. Puedes usar la opción Cargar previo para cargar un charteo de otra dificultad.");
 	
     var char_data = obj_handle_chart_files.load_chart_from_file();
 	if (char_data != undefined) {

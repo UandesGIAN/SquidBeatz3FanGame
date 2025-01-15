@@ -25,7 +25,7 @@ if (global.is_playing) {
 	
 	var text_y = y + 15;
 	
-	if (obj_play.play_music) {
+	if (obj_play.play_music || global.practice_mode) {
 		// 2. Dibujar el sprite de plata (spr_silver) con su contador
 		if (global.octo_icons) draw_sprite(spr_silver_octo, 0, x, text_y + 55);
 		else draw_sprite(spr_silver, 0, x, text_y + 55); // Ajusta la posición según tu diseño

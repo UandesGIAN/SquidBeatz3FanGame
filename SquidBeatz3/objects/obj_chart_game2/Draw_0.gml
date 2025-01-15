@@ -6,19 +6,19 @@ draw_set_halign(fa_left);
 draw_set_valign(fa_top);
 
 draw_set_font(splat_font_title);
-if (global.current_language  == "ENGLISH") draw_text(1024, 268, "Selected: ");
-else draw_text(1024, 268, "Seleccion: ");
-var sprite_position_y = (selected_type < 4) ? 270 : 250;
+if (global.current_language  == "ENGLISH") draw_text(1024, 300, "Selected: ");
+else draw_text(1024, 300, "Seleccion: ");
+var sprite_position_y = (selected_type < 4) ? 320 : 290;
 draw_set_color(global.primary_color_yellow);
-if (global.current_language  == "ENGLISH") draw_text(1024 + string_width("Selected:")/2-5, 305, string(selected_type));
-else draw_text(1024 + string_width("Seleccion:")/2-5, 305, string(selected_type));
+if (global.current_language  == "ENGLISH") draw_text(1023 + string_width("Selected:")/2-7, 345, string(selected_type));
+else draw_text(1023 + string_width("Seleccion:")/2-7, 345, string(selected_type));
 
 draw_set_color(c_white);
 shader_set(shader_hue_shift);
 shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
 
-if (global.current_language  == "ENGLISH") draw_sprite(type_spr[selected_type], 0, 1150, sprite_position_y);
-else draw_sprite(type_spr[selected_type], 0, 1155, sprite_position_y);
+if (global.current_language  == "ENGLISH") draw_sprite(type_spr[selected_type], 0, 1150 + (selected_type == 4 ||selected_type == 0 ||selected_type == 2 ? 5 : 0), sprite_position_y);
+else draw_sprite(type_spr[selected_type], 0, 1155 + (selected_type == 4  ||selected_type == 0 ||selected_type == 2? 5 : 0), sprite_position_y);
 
 shader_reset();
 
@@ -26,9 +26,13 @@ draw_set_color(global.secondary_color_purple);
 if (global.current_language  == "ENGLISH") {
 	draw_text(1024, 150, "Current BPM: " + string(global.tempo));
 	draw_text(1024, 200, "Notes number: " + string(array_length(global.current_chart)));
+	draw_set_color(global.primary_color_yellow);
+	draw_text(1024, 245, "Song duration: " + string(global.new_song_id != undefined && global.new_song_name != "" ? audio_sound_length(global.new_song_id) : audio_sound_length(global.current_song)));
 } else {
 	draw_text(1024, 150, "BPM actual: " + string(global.tempo));
 	draw_text(1024, 200, "Numero de Notas: " + string(array_length(global.current_chart)));
+	draw_set_color(global.primary_color_yellow);
+	draw_text(1024, 245, "Duracion cancion: " + string(global.new_song_id != undefined && global.new_song_name != "" ? audio_sound_length(global.new_song_id) : audio_sound_length(global.current_song)));
 }
 draw_set_color(global.primary_color_yellow);
 switch (global.current_difficulty) {
@@ -50,13 +54,13 @@ switch (global.current_difficulty) {
 draw_set_color(c_white);
 if (global.current_language  == "ENGLISH") draw_text(10, 655, "Start coordinate: " + string(-global.base_x div 1));
 else draw_text(10, 655, "Coordenada de inicio: " + string(-global.base_x div 1));
-if (global.current_language  == "ENGLISH") draw_text(10, 690, "Current second: " + string(obj_chart_game.tiempo_inicio));
-else draw_text(10, 690, "Segundo actual: " + string(obj_chart_game.tiempo_inicio));
+if (global.current_language  == "ENGLISH") draw_text(10, 700, "Current second: " + string(obj_chart_game.tiempo_inicio));
+else draw_text(10, 700, "Segundo actual: " + string(obj_chart_game.tiempo_inicio));
 
 
 draw_set_halign(fa_right);
-if (global.current_language  == "ENGLISH") draw_text(room_width-20, 400, "Current coordinate: " + string((global.base_x + mouse_x) div 1));
-else draw_text(room_width-20, 400, "Coordenada actual: " + string((global.base_x + mouse_x) div 1));
+if (global.current_language  == "ENGLISH") draw_text(room_width-20, 440, "Current coordinate: " + string((global.base_x + mouse_x) div 1));
+else draw_text(room_width-20, 440, "Coordenada actual: " + string((global.base_x + mouse_x) div 1));
 draw_set_halign(fa_left);
 
 if ((!keyboard_check(ord("V")) && !keyboard_check(vk_control) && (keyboard_check_pressed(vk_subtract) || keyboard_check_pressed(vk_add)))) volume_message_timer = current_time + 1000;
@@ -120,8 +124,8 @@ if (array_length(elements) > 0) {
 				draw_set_font(splat_font_title);
 				draw_set_halign(fa_right);
 				draw_set_color(global.primary_color_yellow);
-				if (global.current_language  == "ENGLISH") draw_text(room_width-20, 360, "Selected element: " + string(element.pos_x div 1));
-				else draw_text(room_width-20, 360, "Elemento seleccionado: " + string(element.pos_x div 1));
+				if (global.current_language  == "ENGLISH") draw_text(room_width-20, 400, "Selected element: " + string(element.pos_x div 1));
+				else draw_text(room_width-20, 400, "Elemento seleccionado: " + string(element.pos_x div 1));
             }
 			
 			for (var j = 0; j < array_length(editing_elements); j++) {

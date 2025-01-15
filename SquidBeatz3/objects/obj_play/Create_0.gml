@@ -235,7 +235,9 @@ function load_songs_from_directory(dir_path) {
 
             array_push(global.game_points[$ difficulty].count_silver, 0);
             array_push(global.game_points[$ difficulty].count_gold, 0);
-            array_push(global.game_points[$ difficulty].total_hits, array_length(data.chart));
+            array_push(global.game_points[$ difficulty].total_hits, 0);
+			
+			array_push(global.wins_lifebar[$ difficulty], 0);
         }
 
         var visualizer_file = visualizer_files[i];
@@ -407,8 +409,9 @@ function export_song_files_to_directory(dir_path, song_start, song_end) {
 // Function to handle deletion of files
 function handle_delete_files(start_song_i, end_song_i) {
 	var gamefiles_path = working_directory + "sounds\\";
-	var og_files = array_length(global.song_text_list);
+	var og_files = array_length(global.song_text_list)-1;
 	
+	var i_charts = 0;
 	for (var i = start_song_i; i <= end_song_i; i++) {
 		// DELETE CHARTS
 		var file_path = gamefiles_path + "songs\\charts\\" + string(i) + "_song" + string(i) + ".json";
@@ -417,20 +420,23 @@ function handle_delete_files(start_song_i, end_song_i) {
 				var difficulties = ["easy", "normal", "hard"];
 				for (var j = 0; j < array_length(difficulties); j++) {
 				    var difficulty = difficulties[j];
-
 				    // Loop to remove elements from each difficulty
-				    array_delete(global.charts[$ difficulty].charts, i, 1);
-				    array_delete(global.charts[$ difficulty].tempo, i, 1);
-				    array_delete(global.charts[$ difficulty].start_point, i, 1);
+				    array_delete(global.charts[$ difficulty].charts, i-i_charts, 1);
+				    array_delete(global.charts[$ difficulty].tempo, i-i_charts, 1);
+				    array_delete(global.charts[$ difficulty].start_point, i-i_charts, 1);
 					
-					array_delete(global.game_points[$ difficulty].count_silver, i, 1);
-				    array_delete(global.game_points[$ difficulty].count_gold, i, 1);
-				    array_delete(global.game_points[$ difficulty].total_hits, i, 1);
+					array_delete(global.game_points[$ difficulty].count_silver, i-i_charts, 1);
+				    array_delete(global.game_points[$ difficulty].count_gold, i-i_charts, 1);
+				    array_delete(global.game_points[$ difficulty].total_hits, i-i_charts, 1);
+					
+					array_delete(global.wins_lifebar[$ difficulty], i-i_charts, 1);
+					show_debug_message(json_stringify(global.charts[$ difficulty].tempo));
 				}
 				
 				global.tempo = 120;
 				global.start_point = 272;
 				global.current_chart_index = 0;
+				i_charts++;
 				
 				show_debug_message(global.current_language == "ENGLISH" ? "Deleted chart file at: " + file_path : "Eliminado archivo de charteo en: " + file_path);
 			} else {
@@ -443,18 +449,21 @@ function handle_delete_files(start_song_i, end_song_i) {
 				var difficulty = difficulties[j];
 
 				// Loop to remove elements from each difficulty
-				array_delete(global.charts[$ difficulty].charts, i, 1);
-				array_delete(global.charts[$ difficulty].tempo, i, 1);
-				array_delete(global.charts[$ difficulty].start_point, i, 1);
+				array_delete(global.charts[$ difficulty].charts, i-i_charts, 1);
+				array_delete(global.charts[$ difficulty].tempo, i-i_charts, 1);
+				array_delete(global.charts[$ difficulty].start_point, i-i_charts, 1);
 					
-				array_delete(global.game_points[$ difficulty].count_silver, i, 1);
-				array_delete(global.game_points[$ difficulty].count_gold, i, 1);
-				array_delete(global.game_points[$ difficulty].total_hits, i, 1);
+				array_delete(global.game_points[$ difficulty].count_silver, i-i_charts, 1);
+				array_delete(global.game_points[$ difficulty].count_gold, i-i_charts, 1);
+				array_delete(global.game_points[$ difficulty].total_hits, i-i_charts, 1);
+				
+				array_delete(global.wins_lifebar[$ difficulty], i-i_charts, 1);
 			}
 				
 			global.tempo = 120;
 			global.start_point = 272;
 			global.current_chart_index = 0;
+			i_charts++;
 		}
 		
 		// DELETE SONG
@@ -463,7 +472,7 @@ function handle_delete_files(start_song_i, end_song_i) {
 			if (file_delete(file_path)) {
 				global.current_song = undefined;
 				global.current_song_index = 0;
-				array_delete(global.song_list, i-1, 1);
+				array_delete(global.song_list, i, 1);
 				
 				show_debug_message(global.current_language == "ENGLISH" ? "Deleted audio file at: " + file_path : "Eliminado archivo de musica en: " + file_path);
 			} else {
@@ -473,14 +482,14 @@ function handle_delete_files(start_song_i, end_song_i) {
 		} else {
 			global.current_song = undefined;
 			global.current_song_index = 0;
-			array_delete(global.song_list, i-1, 1);
+			array_delete(global.song_list, i, 1);
 		}
 		
 		// DELETE SONG VISUALIZER
 		file_path = gamefiles_path + "songs\\" + string(i) + "_song" + string(i) + ".json";
 		if (file_exists(file_path)) {
 			if (file_delete(file_path)) {
-				array_delete(global.song_visualizer, i-1, 1);
+				array_delete(global.song_visualizer, i, 1);
 				
 				show_debug_message(global.current_language == "ENGLISH" ? "Deleted visualizer file at: " + file_path : "Eliminado archivo de visualizador en: " + file_path);
 			} else {
@@ -488,7 +497,7 @@ function handle_delete_files(start_song_i, end_song_i) {
 				return;
 			}
 		} else {
-			array_delete(global.song_visualizer, i-1, 1);
+			array_delete(global.song_visualizer, i, 1);
 		}
 		
 		// DELETE SONG NAME
@@ -532,25 +541,29 @@ function handle_delete_files(start_song_i, end_song_i) {
 			return;
 		}
 	}
-	for (var i = end_song_i + 1; i <= og_files; i++) {
-		var new_i = i-(end_song_i - start_song_i)-1;
-        var old_chart_path = gamefiles_path + "songs\\charts\\" + string(i) + "_song" + string(i) + ".json";
-        var new_chart_path = gamefiles_path + "songs\\charts\\" + string(new_i) + "_song" + string(new_i) + ".json";
-        if (file_exists(old_chart_path)) file_rename(old_chart_path, new_chart_path);
+	
+	
+	if (end_song_i + 1 - start_song_i < og_files) {
+		for (var i = end_song_i + 1; i <= og_files; i++) {
+			var new_i = i-(end_song_i - start_song_i)-1;
+	        var old_chart_path = gamefiles_path + "songs\\charts\\" + string(i) + "_song" + string(i) + ".json";
+	        var new_chart_path = gamefiles_path + "songs\\charts\\" + string(new_i) + "_song" + string(new_i) + ".json";
+	        if (file_exists(old_chart_path)) file_rename(old_chart_path, new_chart_path);
         
-        var old_song_path = gamefiles_path + "songs\\" + string(i) + "_song" + string(i) + ".ogg";
-        var new_song_path = gamefiles_path + "songs\\" + string(new_i) + "_song" + string(new_i) + ".ogg";
-        if (file_exists(old_song_path)) file_rename(old_song_path, new_song_path);
+	        var old_song_path = gamefiles_path + "songs\\" + string(i) + "_song" + string(i) + ".ogg";
+	        var new_song_path = gamefiles_path + "songs\\" + string(new_i) + "_song" + string(new_i) + ".ogg";
+	        if (file_exists(old_song_path)) file_rename(old_song_path, new_song_path);
 		
-		var old_visualizer_path = gamefiles_path + "songs\\" + string(i) + "_song" + string(i) + ".json";
-        var new_visualizer_path = gamefiles_path + "songs\\" + string(new_i) + "_song" + string(new_i) + ".json";
-        if (file_exists(old_visualizer_path)) file_rename(old_visualizer_path, new_visualizer_path);
+			var old_visualizer_path = gamefiles_path + "songs\\" + string(i) + "_song" + string(i) + ".json";
+	        var new_visualizer_path = gamefiles_path + "songs\\" + string(new_i) + "_song" + string(new_i) + ".json";
+	        if (file_exists(old_visualizer_path)) file_rename(old_visualizer_path, new_visualizer_path);
 		
-		if (i == og_files) new_i = i-(end_song_i - start_song_i)-2;
-		audio_destroy_stream(global.song_list[new_i])
-		var sound_id = audio_create_stream(gamefiles_path + "songs\\" + string(new_i) + "_song" + string(new_i) + ".ogg");
-		global.song_list[new_i] = sound_id;
-    }
+			show_debug_message(new_song_path + "..." + string(new_i) + "..")
+			audio_destroy_stream(global.song_list[new_i])
+			var sound_id = audio_create_stream(new_song_path);
+			global.song_list[new_i] = sound_id;
+	    }
+	}
 	
 	global.charts.easy.charts[0] = [];
 	global.charts.easy.tempo[0] = 120;

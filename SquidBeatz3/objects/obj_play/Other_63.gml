@@ -64,7 +64,7 @@ if (async_load[? "id"] == global.export_async_id) {
                 end_song_i = input_value;
                 if (end_song_i >= start_song_i && end_song_i <= array_length(global.song_list)-1) {
                     export_step++;
-                    global.export_async_id = get_string_async(global.current_language == "ENGLISH" ? "Enter the absolute path where you want to export the files (If it doesn't exist, it will export to the desktop):" : "Ingrese la ruta ABSOLUTA donde desea exportar los archivos (Si no existe se exportará al escritorio):", "");
+                    global.export_async_id = get_string_async(global.current_language == "ENGLISH" ? "Enter the absolute path where you want to export the files. You can do this from the explorer, right-click, 'Copy address as text'. (If it doesn't exist, it will export to the desktop):" : "Ingrese la ruta ABSOLUTA donde desea exportar los archivos. Puedes hacerlo desde el explorador, en la barra de direcciones, click derecho, 'Copiar dirección como texto'. (Si no existe se exportará al escritorio):", "");
                 } else {
                     show_message(global.current_language == "ENGLISH" ? "The final song number must be greater than or equal to the starting song and less than or equal to " + string(array_length(global.song_list)-1) : "El número de canción final debe ser mayor o igual al de la canción de inicio y menor o igual a " + string(array_length(global.song_list)-1));
                 }

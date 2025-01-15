@@ -343,6 +343,14 @@ if (!message_shown) {
 		// Control de la rueda del ratón
 		if (mouse_wheel_up() && mode == "manual") {
 		    game_bar[index_bar].x += 10;
+			if(game_bar[index_bar].x > 0 && conteo_desplazamiento > 0) {
+		        game_bar[(index_bar - 1 + 4) mod 4].x = game_bar[index_bar].x - sprite_width;
+		        index_bar = (index_bar - 1 + 4) mod 4;
+		        conteo_desplazamiento -= 1;
+		        
+		        has_changed = 1;
+		    }
+			
 			for (var i = 1; i < 4; i++) {
 		        var next_index = (index_bar + i) mod 4;
 		        var prev_index = (index_bar + i - 1) mod 4;
@@ -353,6 +361,13 @@ if (!message_shown) {
 
 		if (mouse_wheel_down() && mode == "manual") {
 		    game_bar[index_bar].x -= 10;
+			if (game_bar[index_bar].x + sprite_width < 0) {
+		        game_bar[index_bar].x = game_bar[(index_bar + 3) mod 4].x + sprite_width;
+		        index_bar = (index_bar + 1) mod 4;
+		        conteo_desplazamiento += 1;
+		        
+		        has_changed = 1;
+			}
 			for (var i = 1; i < 4; i++) {
 		        var next_index = (index_bar + i) mod 4;
 		        var prev_index = (index_bar + i - 1) mod 4;

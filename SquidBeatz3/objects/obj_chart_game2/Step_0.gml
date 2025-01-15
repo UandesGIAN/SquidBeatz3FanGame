@@ -555,8 +555,8 @@ if (!message_shown) {
 
 	// Control para bajar/subir volumen
 	if (!keyboard_check(vk_control) && !keyboard_check(ord("V"))) {
-		if (keyboard_check_pressed(vk_subtract)) audio_sound_gain(obj_chart_game.current_song, max(0,audio_sound_get_gain(obj_chart_game.current_song)-0.2), 0);
-		if (keyboard_check_pressed(vk_add)) audio_sound_gain(obj_chart_game.current_song, min(audio_sound_get_gain(obj_chart_game.current_song)+0.2, 2), 0);
+		if (keyboard_check_pressed(vk_subtract)) audio_set_master_gain(0, max(0, audio_get_master_gain(0)+0.2));
+		if (keyboard_check_pressed(vk_add)) audio_set_master_gain(0, min(audio_get_master_gain(0)+0.2, 2));
 	} 
 	if (keyboard_check(vk_control) && keyboard_check(ord("V"))) {
 		if (keyboard_check_pressed(vk_subtract)) {

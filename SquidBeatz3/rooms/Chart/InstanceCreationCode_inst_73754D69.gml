@@ -1,5 +1,5 @@
-texto = "Guardar";
-texto_en = "Save";
+texto = "Exportar";
+texto_en = "Export";
 
 action = function() {
     if (array_length(global.current_chart) > 0 && global.new_song_id == undefined && global.new_song_name == "") {
