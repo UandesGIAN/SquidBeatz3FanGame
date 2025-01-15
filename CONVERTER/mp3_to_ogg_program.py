@@ -6,11 +6,12 @@ from tkinter.font import Font
 import numpy as np
 import tkinter as tk
 import math
-import wave
+import zipfile
 import numpy as np
 import pywt
 import librosa
 from scipy import signal
+import shutil
 
 
 def calculate_bpm(audio_path):
@@ -89,6 +90,7 @@ def calculate_bpm(audio_path):
 
     return round(bpm_final)
 
+
 # Función para calcular el tiempo de sincronización
 def calculate_sync_tempo(tempo, proportion_bpm_to_speed=132/3600, sprite_width=528, base_x=250):
     x_i = 250
@@ -119,6 +121,7 @@ def calculate_sync_tempo(tempo, proportion_bpm_to_speed=132/3600, sprite_width=5
         sync_tempo = time_to_sync * x_speed
         return int(sync_tempo)
     return None
+
 
 def process_audio_to_matrix(file_path, output_json):
     audio = AudioSegment.from_file(file_path)
@@ -170,18 +173,71 @@ def process_audio_to_matrix(file_path, output_json):
     with open(output_json, "w") as json_file:
         json.dump(visualizer_data, json_file, indent=4)
 
-def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder):
+
+# Export files
+def create_unique_folder(base_name, parent_dir):
+    index = 0
+    while True:
+        folder_name = f"{base_name}{f'_{index}' if index else ''}"
+        folder_path = os.path.join(parent_dir, folder_name)
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+            return folder_path
+        index += 1
+
+def create_unique_zip(base_name, parent_dir):
+    index = 0
+    while True:
+        zip_file_name = f"{base_name}{f'_{index}' if index else ''}.zip"
+        zip_file_path = os.path.join(parent_dir, zip_file_name)
+        if not os.path.exists(zip_file_path):
+            return zip_file_path
+        index += 1
+
+def create_zip(output_folder, parent_dir):
+    zip_file_path = create_unique_zip("converted_songs", parent_dir)
+
+    with zipfile.ZipFile(zip_file_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # Recorre todos los directorios y archivos en output_folder
+        for root, _, files in os.walk(output_folder):
+            for file in files:
+                file_path = os.path.join(root, file)
+                
+                # Calcula la ruta relativa para mantener la estructura de carpetas
+                arcname = os.path.relpath(file_path, start=output_folder)
+                
+                # Escribe el archivo en el ZIP manteniendo la estructura de carpetas
+                zipf.write(file_path, arcname)
+    
+    return zip_file_path
+
+
+
+def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, output_converted_songs):
     converted_files = []
+
     for index, file_path in enumerate(files, start=1):
         if file_path.endswith('.mp3'):
+            base_name = os.path.splitext(os.path.basename(file_path))[0]
+
+            # Crear una carpeta individual para la canción dentro de output_converted_songs
+            song_folder = os.path.join(output_converted_songs, base_name)
+            os.makedirs(song_folder, exist_ok=True)
+
+            # Conversión a OGG
             output_file_name_ogg = f"{index}_song{index}.ogg"
             output_file_path_ogg = os.path.join(output_folder, output_file_name_ogg)
-
             audio = AudioSegment.from_mp3(file_path)
             audio.export(output_file_path_ogg, format="ogg")
-            print(f"Convertido: {file_path} -> {output_file_path_ogg}")
-            converted_files.append(os.path.splitext(os.path.basename(file_path))[0])
 
+            # Copiar el archivo OGG tanto a sounds/songs como a output_converted_songs
+            song_ogg_path = os.path.join(song_folder, f"song.ogg")
+            if not os.path.exists(song_ogg_path):
+                shutil.copy(output_file_path_ogg, song_ogg_path)
+            if not os.path.exists(os.path.join(output_folder, f"{index}_song{index}.ogg")):
+                shutil.copy(output_file_path_ogg, os.path.join(output_folder, f"{index}_song{index}.ogg"))
+
+            # BPM y Chart JSON
             bpm_found = calculate_bpm(file_path)
             start_found = calculate_sync_tempo(bpm_found) if bpm_found else None
 
@@ -207,27 +263,46 @@ def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder):
             with open(chart_file_path, 'w', encoding='utf-8') as chart_file:
                 json.dump(chart_data, chart_file, ensure_ascii=False, indent=4)
 
-            visualizer_json_path = os.path.join(output_folder, chart_file_name)
+            # Copiar el archivo Chart JSON tanto a sounds/songs/charts como a output_converted_songs
+            chart_json_path = os.path.join(song_folder, "chart.json")
+            if not os.path.exists(chart_json_path):
+                shutil.copy(chart_file_path, chart_json_path)
+            if not os.path.exists(os.path.join(chart_folder, chart_file_name)):
+                shutil.copy(chart_file_path, os.path.join(chart_folder, chart_file_name))
+
+            # Visualizer JSON
+            visualizer_json_path = os.path.join(output_folder, f"{index}_song{index}.json")
             process_audio_to_matrix(file_path, visualizer_json_path)
 
+            # Copiar el archivo Visualizer JSON tanto a sounds/songs como a output_converted_songs
+            visualizer_json_dest = os.path.join(song_folder, "visualizer.json")
+            if not os.path.exists(visualizer_json_dest):
+                shutil.copy(visualizer_json_path, visualizer_json_dest)
+            if not os.path.exists(os.path.join(output_folder, f"{index}_song{index}.json")):
+                shutil.copy(visualizer_json_path, os.path.join(output_folder, f"{index}_song{index}.json"))
+
+            # Archivo de nombre de la canción TXT
+            song_name_txt_path = os.path.join(song_folder, f"{base_name}.txt")
+            with open(song_name_txt_path, 'w', encoding='utf-8') as txt_file:
+                txt_file.write(base_name)
+
+            converted_files.append(base_name)
+
+    # Escribir el archivo song_titles.json en sounds/
     with open(name_file_path, 'w', encoding='utf-8') as name_file:
         json.dump({"song_names": converted_files}, name_file, ensure_ascii=False, indent=4)
-    
-    messagebox.showinfo("Conversion Completed", "Files have been successfully converted and saved.")
 
-def show_instructions():
-    instructions = (
-        "Use this program to convert a .mp3 file or multiple files in a folder to .ogg format.\n"
-        "It generates a base charting JSON with calculated BPM and start point, and a visualizer JSON.\n\n"
-        "To load the songs into SquidBeatz3, compress the generated files in the 'to_ogg' folder into a .ZIP\n"
-        "with the structure: sounds > songs > charts. Each .ogg or .json file should be named\n"
-        "{number}_song{number}.format. Additionally, a 'song_titles.json' file must be included in the 'sounds' folder."
-    )
-    messagebox.showinfo("How to Use", instructions)
+
+def clean_up(folder):
+    for root, dirs, files in os.walk(folder, topdown=False):
+        for file in files:
+            os.remove(os.path.join(root, file))
+        for dir in dirs:
+            os.rmdir(os.path.join(root, dir))
+    os.rmdir(folder)
 
 
 def open_and_convert():
-    # Select file or folder
     response = messagebox.askyesno(
         title="Selection Type",
         message="Do you want to select a single file?\nClick 'Yes' for a file or 'No' for a folder."
@@ -255,17 +330,38 @@ def open_and_convert():
         messagebox.showerror("Error", "No files or folders selected.")
         return
 
-    # Create output structure
+    input_folder = os.path.join(input_folder, 'CONVERSION_OUTPUTS')
+
+    # Crear directorios
     output_folder = os.path.join(input_folder, 'sounds/songs')
     chart_folder = os.path.join(output_folder, 'charts')
     os.makedirs(chart_folder, exist_ok=True)
     name_file_path = os.path.join(input_folder, 'sounds/song_titles.json')
+    output_converted_songs = create_unique_folder('output_converted_songs', input_folder)
 
-    # Convert files
-    convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder)
+    convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, output_converted_songs)
+    sounds_folder = os.path.join(input_folder, 'sounds')
+    os.makedirs(sounds_folder, exist_ok=True)
+
+    zip_file_path = create_zip(sounds_folder, input_folder)
+    
+    clean_up(sounds_folder)
+
+    messagebox.showinfo("Conversion Completed", f"Files have been successfully converted and saved in {zip_file_path}.")
 
 def exit_program():
     root.destroy()
+
+def show_instructions():
+    instructions = (
+        "Use this program to convert a .mp3 file or multiple files in a folder to .ogg format.\n"
+        "It generates a base charting JSON with calculated BPM and start point, and a visualizer JSON.\n\n"
+        "To load the songs into SquidBeatz3, load the zip created at the selected file(s)'s directory\n"
+        "Or you can load each individual file for a song at the folder named as the original mp3 file.\n"
+        "IMPORTANT: You must have ffmpeg and python installed at your PC. TO USE THIS PROGRAM YOU MUST HAVE ADMINISTRATOR PERMISSIONS\n"
+    )
+    messagebox.showinfo("How to Use", instructions)
+
 
 # Create main application window
 root = tk.Tk()
