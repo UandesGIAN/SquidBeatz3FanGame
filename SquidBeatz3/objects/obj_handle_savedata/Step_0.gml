@@ -25,7 +25,7 @@ if (message_shown) {
 	var text_y = msg_y + 80;
 
 	// Botón "[CHARTS]"
-	if ((mouse_check_button_pressed(mb_left) && mx > msg_x + msg_width / 2 - string_width("[CHARTS]") - 10 && mx < msg_x + msg_width / 2 + string_width("[CHARTS]") + 10 && my > msg_y + 90 - padding && my < msg_y + 90 + padding + 20) || (selected_row == 0 && (keyboard_check_pressed(vk_enter) || keyboard_check_pressed(vk_escape)))) {
+	if ((mouse_check_button_pressed(mb_left) && mx > msg_x + msg_width / 2 - string_width("[CHARTS]") - 10 && mx < msg_x + msg_width / 2 + string_width("[CHARTS]") + 10 && my > msg_y + 90 - padding && my < msg_y + 90 + padding + 20) || (selected_row == 0 && (keyboard_check_pressed(vk_enter)))) {
 	    load_ini_data(load_path, "charts");
 	    message_shown = 0;
 	    with (obj_editor_button) {

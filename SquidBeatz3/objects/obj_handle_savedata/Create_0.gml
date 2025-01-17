@@ -20,12 +20,18 @@ function get_directory_contents(dname, pattern) {
 }
 
 
-
 function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_load) {
 	
 	if (file_exists(dir_path)) {
         ini_open(dir_path);
-
+		
+		var array_string = ini_read_string("Main", "SongNames", "[]");
+		array_string = string_replace_all(array_string, "[", "[\"");
+	    array_string = string_replace_all(array_string, "]", "\"]");
+	    array_string = string_replace_all(array_string, ", ", "\", \"");
+		var loaded_songs = json_parse(array_string);
+		
+		show_debug_message(json_stringify(global.song_text_list) + " . . . . . " + json_stringify(loaded_songs));
         // Cargar según el tipo especificado
         if (type_of_load == "all" || type_of_load == "charts") {
             // Cargar datos de "Charts"
@@ -40,15 +46,68 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			json_string = string_replace_all(json_string, "pos_x", "\"pos_x\"");
 			
 			var loaded_charts = json_parse(json_string);
+			var progress_restarted = [];
 			
 			var dif = ["easy", "normal", "hard"];
-			for (var d = 0; d < 3; d++) {
-				var difficulty = dif[d];
-				for (var i = 0; i < array_length(global.charts[$ difficulty].charts); i++) {
-					if (i < array_length(global.song_text_list) && i < array_length(loaded_charts[$ difficulty].charts)) {
-						global.charts[$ difficulty].charts[i] = loaded_charts[$ difficulty].charts[i];
-						global.charts[$ difficulty].tempo[i] = loaded_charts[$ difficulty].tempo[i];
-						global.charts[$ difficulty].start_point[i] = loaded_charts[$ difficulty].start_point[i];
+			for (var i = 1; i < array_length(loaded_songs); i++) {
+				var current_loaded_song = loaded_songs[i];
+				for (var j = 1; j < array_length(global.song_text_list); j++) {
+					var real_song = global.song_text_list[j];
+					if (current_loaded_song == real_song) {
+						var save_data_restart = 0;
+						for (var d = 0; d < 3; d++) {
+							var difficulty = dif[d];
+							if (type_of_load == "charts" && array_length(global.charts[$ difficulty].charts) != array_length(loaded_charts[$ difficulty].charts)) {
+								save_data_restart = j;
+								global.game_points[$ difficulty].count_silver[j] = 0;
+								global.game_points[$ difficulty].count_gold[j] = 0;
+								global.game_points[$ difficulty].total_hits[j] = 0;
+								global.wins_lifebar[$ difficulty][j] = 0;
+							}
+							global.charts[$ difficulty].charts[j] = loaded_charts[$ difficulty].charts[i];
+							global.charts[$ difficulty].tempo[j] = loaded_charts[$ difficulty].tempo[i];
+							global.charts[$ difficulty].start_point[j] = loaded_charts[$ difficulty].start_point[i];
+						}
+							
+						array_push(progress_restarted, j);
+						
+						var chart_data = {
+						    easy: {
+						        chart: global.charts.easy.charts[j],
+						        tempo: global.charts.easy.tempo[j],
+						        start_point: global.charts.easy.start_point[j]
+						    },
+						    normal: {
+						        chart: global.charts.normal.charts[j],
+						        tempo: global.charts.normal.tempo[j],
+						        start_point: global.charts.normal.start_point[j]
+						    },
+						    hard: {
+						        chart: global.charts.hard.charts[j],
+						        tempo: global.charts.hard.tempo[j],
+						        start_point: global.charts.hard.start_point[j]
+						    }
+						};
+							
+						var json_data = json_stringify(chart_data);
+
+						// Nombre del archivo a guardar y ruta
+						var file_name = string(j) + "_song" + string(j) + ".json";
+						var gamefile_path = working_directory + "\\sounds\\songs\\charts\\";
+    
+						// Si se selecciona una ruta válida, guarda el archivo
+						if (directory_exists(gamefile_path)) {
+							var file = file_text_open_write(gamefile_path + file_name);
+							if (file != -1) {
+								file_text_write_string(file, json_data);
+								file_text_close(file);
+								show_debug_message("Chart guardado exitosamente como " + file_name);
+							} else {
+								show_debug_message("Error al abrir el archivo para escritura.");
+							}
+						} else {
+							show_debug_message("Directorio no existe o no tiene permisos de escritura.");
+						}
 					}
 				}
 			}
@@ -56,9 +115,13 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
             if (type_of_load == "charts") {
                 ini_close();
 				if (global.first_load) {
-			    show_message(global.current_language == "ENGLISH"
-			        ? "Game data loaded successfully from " + string(dir_path) + "."
-			        : "Datos de guardado cargados exitosamente desde " + string(dir_path) + ".");
+					var progress_restart_songs = json_stringify(progress_restarted);
+					progress_restart_songs = string_replace_all(progress_restart_songs, "[", "");
+					progress_restart_songs = string_replace_all(progress_restart_songs, ".0", "");
+					progress_restart_songs = string_replace_all(progress_restart_songs, "]", "");
+				    show_message(global.current_language == "ENGLISH"
+				        ? "Game data loaded successfully from " + string(dir_path) + ".\nGame progresss for songs: " + progress_restart_songs + ". Was restarted because the chart data was different. To load the progress use the PROGRESS or ALL option."
+				        : "Datos de guardado cargados exitosamente desde " + string(dir_path) + ".\nProgreso del juego para las canciones: " + progress_restart_songs + ". Fue restablecido porque los datos de charteo eran diferentes. Para cargar el progreso usa la opción PROGRESO o TODO al cargar.");
 				}
                 return; // Salir después de cargar solo charts
             }
@@ -76,18 +139,6 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			
 			var loaded_game_points = json_parse(json_string);
 			
-			json_string = ini_read_string("Main", "Charts", global.charts);
-			json_string = string_replace_all(json_string, "normal", "\"normal\"");
-			json_string = string_replace_all(json_string, "hard", "\"hard\"");
-			json_string = string_replace_all(json_string, "easy", "\"easy\"");
-			json_string = string_replace_all(json_string, "start_point", "\"start_point\"");
-			json_string = string_replace_all(json_string, "tempo", "\"tempo\"");
-			json_string = string_replace_all(json_string, "charts", "\"charts\"");
-			json_string = string_replace_all(json_string, "index_type", "\"index_type\"");
-			json_string = string_replace_all(json_string, "pos_x", "\"pos_x\"");
-			
-			var saved_game_charts = json_parse(json_string);
-			
 			json_string = ini_read_string("Main", "WinsLifebar", global.wins_lifebar);
 			json_string = string_replace_all(json_string, "normal", "\"normal\"");
 			json_string = string_replace_all(json_string, "hard", "\"hard\"");
@@ -96,20 +147,24 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			var loaded_wins = json_parse(json_string);
 			
 			var dif = ["easy", "normal", "hard"];
-			for (var d = 0; d < 3; d++) {
-				var difficulty = dif[d];
-				for (var i = 0; i < array_length(global.song_text_list); i++) {
-					if (i < array_length(saved_game_charts[$ difficulty].charts)) { 
-						if (array_length(saved_game_charts[$ difficulty].charts[i]) == array_length(global.charts[$ difficulty].charts[i])) {
-							global.game_points[$ difficulty].count_silver[i] = loaded_game_points[$ difficulty].count_silver[i];
-							global.game_points[$ difficulty].count_gold[i] = loaded_game_points[$ difficulty].count_gold[i];
-							global.game_points[$ difficulty].total_hits[i] = loaded_game_points[$ difficulty].total_hits[i];
-							global.wins_lifebar[$ difficulty][i] = loaded_wins[$ difficulty][i];
+			
+			for (var i = 1; i < array_length(loaded_songs); i++) {
+				var current_loaded_song = loaded_songs[i];
+				for (var j = 1; j < array_length(global.song_text_list); j++) {
+					var real_song = global.song_text_list[j];
+					if (current_loaded_song == real_song) {
+						for (var d = 0; d < 3; d++) {
+							var difficulty = dif[d];
+							global.game_points[$ difficulty].count_silver[j] = loaded_game_points[$ difficulty].count_silver[i];
+							global.game_points[$ difficulty].count_gold[j] = loaded_game_points[$ difficulty].count_gold[i];
+							global.game_points[$ difficulty].total_hits[j] = loaded_game_points[$ difficulty].total_hits[i];
+							global.wins_lifebar[$ difficulty][j] = loaded_wins[$ difficulty][i];
 						}
+						break;
 					}
 				}
 			}
-
+			
             if (type_of_load == "game_points") {
                 ini_close();
 				if (global.first_load) {
@@ -169,6 +224,7 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
         if (type_of_load == "all") {
             // Cargar la configuración del idioma (esto se hace al final para asegurarnos de que no interfiera)
             global.current_language = ini_read_string("Settings", "Language", "ENGLISH");
+			global.song_text_list[0] = (global.current_language == "ENGLISH" ? "0. Add a new song (Shift)" : "0. Agregar nueva cancion (Shift)");
         }
 
         ini_close();
@@ -198,6 +254,14 @@ function save_ini_data(dir_path=working_directory + "save_data.ini") {
 	ini_write_string("Main", "Charts", global.charts);
 	ini_write_string("Main", "GamePoints", global.game_points);
 	ini_write_string("Main", "WinsLifebar", global.wins_lifebar);
+	
+	var array_string = "[";
+    for (var i = 0; i < array_length(global.song_text_list); i++) {
+        array_string += string(global.song_text_list[i]); // Sin comillas
+        if (i < array_length(global.song_text_list) - 1) array_string += ", ";
+    }
+    array_string += "]";
+	ini_write_string("Main", "SongNames", array_string);
 		
 	// Sección de colores de la interfaz
 	ini_write_real("Settings", "CurrentSFXIndex", global.current_sfx_index);

@@ -150,7 +150,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 							array_push(alpha_hit, 1);
 					
 							combo_count++;
-							if (!global.practice_mode) {
+							if (!global.practice_mode || !global.lifebar) {
 								if (element.index_type == 0 || element.index_type == 2) current_life += 2;
 								else if (element.index_type > 4) current_life += 7;
 								else current_life += 5;
@@ -171,7 +171,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 					
 							combo_count++;
 							
-							if (!global.practice_mode) {
+							if (!global.practice_mode || !global.lifebar) {
 								if (element.index_type == 0 || element.index_type == 2) current_life += 5;
 								else if (element.index_type > 4) current_life += 15;
 								else current_life += 10;
@@ -212,7 +212,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 							pos_y_hit = [];
 							pos_x_hit = [];
 							alpha_hit = [];
-							if (!global.practice_mode) {
+							if (!global.practice_mode || !global.lifebar) {
 								if (element.index_type == 0 || element.index_type == 2) current_life -= 25;
 								else if (element.index_type > 4) current_life -= 30;
 								else current_life -= 20;
@@ -244,7 +244,7 @@ if (global.new_song_id == undefined && global.new_song_name == "") {
 						pos_x_hit = [];
 						alpha_hit = [];
 						text_timer = current_time;
-						if (!global.practice_mode) {
+						if (!global.practice_mode || !global.lifebar) {
 							current_life -= 20;
 							if (current_life <= 0) current_life = 0;
 						}

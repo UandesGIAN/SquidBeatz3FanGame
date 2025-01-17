@@ -71,6 +71,8 @@ if (message_shown) {
 	}
 	if (global.current_language == "ENGLISH") draw_text(msg_x + msg_width / 2, text_y + 180- 5, "[ALL]");
 	else draw_text(msg_x + msg_width / 2, text_y + 180- 5, "[TODO]");
+	
+	draw_sprite(spr_esc_pc, 0, msg_x + msg_width - sprite_get_width(spr_esc_pc) - 25, msg_y + msg_height - sprite_get_height(spr_esc_pc) - 10)
 }
 
 
