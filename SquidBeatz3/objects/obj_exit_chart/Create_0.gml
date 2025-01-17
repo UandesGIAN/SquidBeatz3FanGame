@@ -206,7 +206,14 @@ function load_single_song() {
 
         // Convertir el JSON a un struct
         var chart_data = json_parse(json_data);
-
+		
+		if (array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]) != array_length(global.current_chart)) {
+			global.game_points[$ global.current_difficulty].count_silver[global.current_chart_index] = 0;
+			global.game_points[$ global.current_difficulty].count_gold[global.current_chart_index] = 0;
+			global.game_points[$ global.current_difficulty].total_hits[global.current_chart_index] = 0;
+			global.wins_lifebar[$ global.current_difficulty][global.current_chart_index] = 0;
+		}
+		
         global.charts[$ global.current_difficulty].tempo[global.current_chart_index] = chart_data[$ global.current_difficulty].tempo;
 	    global.charts[$ global.current_difficulty].charts[global.current_chart_index] = chart_data[$ global.current_difficulty].chart;
 	    global.charts[$ global.current_difficulty].start_point[global.current_chart_index] = chart_data[$ global.current_difficulty].start_point;

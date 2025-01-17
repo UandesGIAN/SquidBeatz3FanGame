@@ -204,7 +204,7 @@ def create_zip(output_folder, parent_dir):
                 file_path = os.path.join(root, file)
                 
                 # Calcula la ruta relativa para mantener la estructura de carpetas
-                arcname = os.path.relpath(file_path, start=output_folder)
+                arcname = os.path.relpath(file_path, start=output_folder+"/..")
                 
                 # Escribe el archivo en el ZIP manteniendo la estructura de carpetas
                 zipf.write(file_path, arcname)
@@ -340,12 +340,10 @@ def open_and_convert():
     output_converted_songs = create_unique_folder('output_converted_songs', input_folder)
 
     convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, output_converted_songs)
-    sounds_folder = os.path.join(input_folder, 'sounds')
-    os.makedirs(sounds_folder, exist_ok=True)
 
-    zip_file_path = create_zip(sounds_folder, input_folder)
+    zip_file_path = create_zip(os.path.join(input_folder, 'sounds/'), input_folder)
     
-    clean_up(sounds_folder)
+    clean_up(os.path.join(input_folder, 'sounds/'))
 
     messagebox.showinfo("Conversion Completed", f"Files have been successfully converted and saved in {zip_file_path}.")
 

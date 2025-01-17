@@ -1,16 +1,24 @@
 /// @description Insert description here
 // You can write your code in this editor
 
-if (!variable_global_exists("current_language")) {
-	global.current_language= "ENGLISH"
+if (file_exists(working_directory+"save_data.ini")) {
+	ini_open(working_directory+"save_data.ini");
+	global.current_language = ini_read_string("Settings", "Language", "ENGLISH");
+	ini_close();
 }
 
-// Lista de canciones con sus nombres
-if (!variable_global_exists("song_text_list")) {
-	global.song_text_list = [
-		"0. Agregar nueva cancion (Shift)",
-	];
+
+current_load = 0;
+time_delay = current_time;
+
+if (!variable_global_exists("current_language")) {
+	global.current_language = "ENGLISH";
 }
+
+global.song_text_list = [
+	(global.current_language == "ENGLISH" ? "0. Add a new song (Shift)" : "0. Agregar nueva cancion (Shift)"),
+];
+
 // Lista de canciones
 if (!variable_global_exists("song_list")) {
     global.song_list = [
@@ -56,6 +64,16 @@ if (!variable_global_exists("bg_options")) {
 }
 if (!variable_global_exists("current_bg_index")) {
     global.current_bg_index = 0;
+}
+
+if (!variable_global_exists("dance_sprites")) {
+    global.dance_sprites = [
+		[spr_dance1, spr_dance2, spr_dance3, spr_dance4, spr_dance5, spr_dance6, spr_dance7, spr_dance8],
+		[spr_dance1, spr_dance2, spr_dance3, spr_dance4, spr_dance5, spr_dance6, spr_dance7, spr_dance8]
+    ];
+}
+if (!variable_global_exists("custom_sprites")) {
+    global.custom_sprites = [0,0]; // [default/none/using_custom, grayscale]
 }
 
 // FUNCION UTIL PARA OBTENER CONTENIDO DENTRO DE UN DIRECTORIO DEL TIPO pattern
@@ -320,6 +338,39 @@ function load_bg(dir_path=working_directory+"sprites\\") {
 	    }
 	}
 }
+
+
+function load_dances(dir_path=working_directory+"sprites\\") {
+	var dance_files = [dir_path+"custom_dances\\dance1.gif",
+					dir_path+"custom_dances\\dance2.gif",
+					dir_path+"custom_dances\\dance3.gif",
+					dir_path+"custom_dances\\dance4.gif",
+					dir_path+"custom_dances\\dance5.gif",
+					dir_path+"custom_dances\\dance6.gif",
+					dir_path+"custom_dances\\dance7.gif",
+					dir_path+"custom_dances\\dance8.gif",]
+	
+	for (var i = 0; i < 8; i++) {
+		var file_path = dance_files[i];
+		var gif_frame_sprites = undefined;
+		var gif_delays = [0]; // delays per frame, in centiseconds
+		
+	    // If a valid file is selected
+	    if (file_exists(file_path)) {
+			var gif_sprite = sprite_add_gif(file_path, 0, 0, gif_delays, gif_frame_sprites);
+
+
+		    // Guardar el GIF en el arreglo global
+		    global.dance_sprites[1][i] = gif_sprite;
+			show_debug_message(gif_sprite);
+			
+			show_debug_message(global.current_language == "ENGLISH" ? "Sprite dance " + string(i+1) + " successfully updated." : "Baile para el sprite " + string(i+1) + " actualizado con éxito.");
+	    } else {
+	        show_debug_message((global.current_language == "ENGLISH" ? "No file found " : "No existe el archivo ") + string(file_path));
+	    }
+	}
+}
+
 
 global.new_song_name = "";
 global.new_song_id = undefined;

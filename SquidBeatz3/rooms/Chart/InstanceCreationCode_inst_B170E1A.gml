@@ -19,7 +19,7 @@ action = function() {
 			case "normal":
 				if ((array_length(global.charts.easy.charts[global.current_chart_index]) > 0 ||
 					array_length(global.charts.hard.charts[global.current_chart_index]) > 0)) {
-					obj_exit_chart.load_shown = !load_shown;
+					obj_exit_chart.load_shown = !obj_exit_chart.load_shown;
 					obj_exit_chart.already_check_load = 1;
 					obj_chart_game.message_shown = 1;
 					obj_chart_game2.message_shown = 1;
@@ -31,7 +31,7 @@ action = function() {
 			case "hard":
 				if ((array_length(global.charts.easy.charts[global.current_chart_index]) > 0 ||
 					array_length(global.charts.normal.charts[global.current_chart_index]) > 0)) {
-					obj_exit_chart.load_shown = !load_shown
+					obj_exit_chart.load_shown = !obj_exit_chart.load_shown
 					obj_chart_game.message_shown = 1;
 					obj_chart_game2.message_shown = 1;
 					obj_editor_button.blocked = 1;

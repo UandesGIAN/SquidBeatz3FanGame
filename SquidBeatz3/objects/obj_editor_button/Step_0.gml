@@ -2,7 +2,7 @@
 // You can write your code in this editor
 
 if (room == Settings) {
-	if (obj_handle_savedata.message_shown || obj_handle_savedata.message_shown2 || obj_sync_color_sample.message_shown || obj_background_show.message_shown || obj_handle_sfx_change.message_shown) blocked = 1;
+	if (obj_handle_savedata.message_shown || obj_handle_savedata.message_shown2 || obj_sync_color_sample.message_shown || obj_background_show.message_shown  || obj_handle_custom_sprites.message_shown || obj_handle_sfx_change.message_shown) blocked = 1;
 } else {
 	if (obj_chart_game.message_shown || obj_chart_game2.message_shown) blocked = 1;
 	else blocked = 0;

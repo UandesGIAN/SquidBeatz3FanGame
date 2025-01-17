@@ -46,7 +46,10 @@ if (message_shown && current_time - inputs_delay > 100) {
     // Títulos y sprites
     var row_headers = ["SFX", "DEFAULT", "USER1", "USER2"];
     var row_actions = ["EDIT", "", "REPLACE", "REPLACE"];
-	if (global.current_language == "CASTELLANO") row_actions = ["EDITAR", "", "REEMPLAZAR", "REEMPLAZAR"];
+	if (global.current_language == "CASTELLANO") {
+		row_actions = ["EDITAR", "", "REEMPLAZAR", "REEMPLAZAR"];
+		row_headers = ["SFX", "DEFAULT", "USUARIO1", "USUARIO2"];
+	}
     var sprites = [spr_lr, spr_lr2, spr_abxy];
     var button_text = "Play";
 	if (global.current_language == "CASTELLANO") button_text = "Escuchar";
@@ -127,14 +130,14 @@ if (message_shown && current_time - inputs_delay > 100) {
             // Detectar clics en acciones
             if (mouse_check_button_pressed(mb_left) && !global.is_gamepad) {
                 var mx = mouse_x, my = mouse_y;
-                if (point_in_rectangle(mx, my, x_local_action - cell_width / 2, y_local - cell_height / 2, x_local_action + cell_width / 2, y_local + cell_height / 2)) {
-                    if (row == 3) change_or_add_sfx(2);
+                if (point_in_rectangle(mx, my, x_local_action - cell_width / 2, y_local - cell_height / 2, x_local_action + cell_width / 2, y_local + cell_height / 2) && check_permissions()) {
+					if (row == 3) change_or_add_sfx(2);
 					else change_or_add_sfx(1);
 					
 					global.current_sfx_index = row - 1;
                 }
             }
-			if (((keyboard_check_pressed(vk_enter) && !global.is_gamepad) || (!gamepad_message && global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2))) && selected_row == row && selected_col == 1) {
+			if (((keyboard_check_pressed(vk_enter) && !global.is_gamepad) || (!gamepad_message && global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2))) && selected_row == row && selected_col == 1 && check_permissions()) {
 				if(global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2)) {
 					gamepad_message = 1;
 				} else {
@@ -155,7 +158,7 @@ if (message_shown && current_time - inputs_delay > 100) {
 				shader_set(shader_hue_shift);
 				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
 
-                draw_sprite(sprites[col], 0, x_local - 15, y_local - 25);
+                draw_sprite(sprites[col], 0, x_local - 15-5, y_local - 25);
 				shader_reset();
             } else {
                 // Otras filas: dibujar botones
@@ -168,11 +171,13 @@ if (message_shown && current_time - inputs_delay > 100) {
 				}
 				
 				if (row == selected_row && col+2 == selected_col) {
-	                draw_set_color(global.secondary_color_purple);
+					var index = row;
+					var column = (col + 1) % 3;
+					if  (audio_is_playing(global.sound_effects[index-1][column])) draw_set_color(global.primary_color_yellow);
+	                else draw_set_color(global.secondary_color_purple);
 	            } else {
 	                draw_set_color(color_button);
 	            }
-                draw_text(x_local, y_local, button_text);
 
                 // Detectar clics en botones
                 if (mouse_check_button_pressed(mb_left) && !global.is_gamepad) {
@@ -181,13 +186,17 @@ if (message_shown && current_time - inputs_delay > 100) {
                         var index = row;
 						var column = (col + 1) % 3;
 						audio_play_sound(global.sound_effects[index-1][column], 0, 0);
+						draw_set_color(global.primary_color_yellow);
                     }
-                }
+                } else 
 				if (((keyboard_check_pressed(vk_enter) && !global.is_gamepad) || (!gamepad_message && global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2))) && selected_row == row && col+2 == selected_col) {
 					var index = row;
 					var column = (col + 1) % 3;
 					audio_play_sound(global.sound_effects[index-1][column], 0, 0);
+					draw_set_color(global.primary_color_yellow);
 				}
+				
+				draw_text(x_local, y_local, button_text);
             }
         }
     }

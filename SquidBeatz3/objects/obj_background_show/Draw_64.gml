@@ -45,7 +45,7 @@ if (message_shown && current_time - inputs_delay > 100) {
     var row_headers = ["BACKGROUND", "DEFAULT", "NONE", "USER1", "USER2"];
     var row_actions = ["EDIT", "", "", "CHANGE", "CHANGE"];
     if (global.current_language == "CASTELLANO") {
-        row_headers[0] = "FONDO";
+        row_headers = ["FONDO", "POR DEFECTO", "NADA", "USUARIO1", "USUARIO2"];
         row_actions = ["EDITAR", "", "", "CAMBIAR", "CAMBIAR"];
     }
 
@@ -62,7 +62,7 @@ if (message_shown && current_time - inputs_delay > 100) {
     var header_y = table_y - cell_height - 10;
     draw_text(table_x - (cell_width + col_spacing), header_y, row_headers[0]);
     draw_text(table_x, header_y, row_actions[0]);
-    draw_text(table_x + (cell_width + col_spacing), header_y, "IMAGE");
+    draw_text(table_x + (cell_width + col_spacing), header_y, global.current_language == "ENGLISH" ? "IMAGE" : "IMAGEN");
 
     // Dibujar tabla
     for (var row = 1; row < array_length(row_headers); row++) {
@@ -111,7 +111,7 @@ if (message_shown && current_time - inputs_delay > 100) {
 
             // Detectar clic en acciones
             if (mouse_check_button_pressed(mb_left) && !global.is_gamepad) {
-                if (point_in_rectangle(mouse_x, mouse_y, x_action - cell_width / 2, y_local - cell_height / 2, x_action + cell_width / 2, y_local + cell_height / 2)) {
+                if (point_in_rectangle(mouse_x, mouse_y, x_action - cell_width / 2, y_local - cell_height / 2, x_action + cell_width / 2, y_local + cell_height / 2) && check_permissions()) {
                     if (row >= 3) {
                         change_or_add_bg(row - 1);
                         global.current_bg_index = row - 1;
@@ -119,7 +119,7 @@ if (message_shown && current_time - inputs_delay > 100) {
                 }
             }
 			
-			if (((keyboard_check_pressed(vk_enter) && !global.is_gamepad) || (!gamepad_message && global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2))) && selected_row == row && selected_col == 1) {
+			if (((keyboard_check_pressed(vk_enter) && !global.is_gamepad) || (!gamepad_message && global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2))) && selected_row == row && selected_col == 1  && check_permissions()) {
 				if(global.is_gamepad && gamepad_button_check_pressed(global.current_gamepad, gp_face2)) {
 					gamepad_message = 1;
 				} else {

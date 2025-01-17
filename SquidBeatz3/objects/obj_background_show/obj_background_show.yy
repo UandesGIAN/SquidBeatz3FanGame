@@ -32,10 +32,7 @@
   "resourceType":"GMObject",
   "resourceVersion":"2.0",
   "solid":false,
-  "spriteId":{
-    "name":"spr_background_show",
-    "path":"sprites/spr_background_show/spr_background_show.yy",
-  },
+  "spriteId":null,
   "spriteMaskId":null,
   "visible":true,
 }

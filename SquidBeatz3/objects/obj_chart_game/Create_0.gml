@@ -13,9 +13,6 @@ sfx_delay = current_time;
 
 has_changed = 0;
 playing_audio = 0;
-
-global.tempo = 120;
-global.start_point = 272;
 current_song = global.new_song_id;
 
 checkpoint_start = -1;
@@ -28,7 +25,7 @@ checkpoint_base_x = 0;
 if (global.new_song_id == undefined || global.new_song_name == "") {
 	global.tempo = global.charts[$ global.current_difficulty].tempo[global.current_chart_index];
 	current_song = global.song_list[global.current_song_index];
-	global.start_point = global.charts[$ global.current_difficulty].start_point[global.current_chart_index] + global.sound_delay*10;
+	global.start_point = global.charts[$ global.current_difficulty].start_point[global.current_chart_index];
 }
 
 xprev = global.start_point;

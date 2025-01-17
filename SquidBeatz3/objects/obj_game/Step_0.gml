@@ -116,6 +116,7 @@ if (id == game_bar[0] && global.is_playing && global.current_song != undefined) 
 				obj_play.play_music = 0;
 				obj_play.sound_playing = -1;
 				obj_game2.processed_elements = [];
+				obj_play.sprite_index_local = -1;
 			}
 			
 			if (mouse_check_button(mb_middle) && !global.is_gamepad && !has_changed) {

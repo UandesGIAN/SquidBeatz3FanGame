@@ -2,7 +2,7 @@
 // You can write your code in this editor
 
 // Desde el editor, si se presiona ctrl+O se permite cargar un chart desde un archivo JSON compatible
-if (keyboard_check(vk_control) && keyboard_check_pressed(ord("O"))) {
+if (keyboard_check(vk_control) && keyboard_check_pressed(ord("O")) && check_permissions()) {
 	show_message(global.current_language == "ENGLISH" ? "WARNING: Opening a chart .JSON file will load the CURRENT DIFFICULTY's chart, be sure to be at the right difficulty to load. You can use the Load previous to load a chart from another difficulty." : "ADVERTENCIA: Abrir un archivo .JSON de un chart cargará el charteo de la DIFICULTAD ACTUAL. Asegúrate de estar en la dificultad correcta antes de cargar. Puedes usar la opción Cargar previo para cargar un charteo de otra dificultad.");
 	var char_data = load_chart_from_file();
 	if (char_data != undefined) {
@@ -24,7 +24,7 @@ if (keyboard_check(vk_control) && keyboard_check_pressed(ord("O"))) {
 }
 
 // Al hacer ctrl+S se permite exportar el archivo de charteo como JSON
-if (keyboard_check(vk_control) && keyboard_check_pressed(ord("S"))) {
+if (keyboard_check(vk_control) && keyboard_check_pressed(ord("S")) && check_permissions()) {
 	if (array_length(global.current_chart) > 0 && (global.new_song_id == undefined || global.new_song_name == "")) {
 		export_chart_to_file(global.tempo, global.current_chart, global.start_point);
     } else {
@@ -33,12 +33,12 @@ if (keyboard_check(vk_control) && keyboard_check_pressed(ord("S"))) {
 }
 
 // Al hacer ctrl+T se permite reemplazar el nombre de la canción
-if (keyboard_check(vk_control) && keyboard_check_pressed(ord("R"))) {
+if (keyboard_check(vk_control) && keyboard_check_pressed(ord("R"))  && check_permissions()) {
 	replace_song_name();
 }
 
 // Al hacer ctrl+Y se permite reemplazar el audio de la canción
-if (keyboard_check(vk_control) && keyboard_check_pressed(ord("T"))) {
+if (keyboard_check(vk_control) && keyboard_check_pressed(ord("T"))  && check_permissions()) {
 	replace_song();
 }
 

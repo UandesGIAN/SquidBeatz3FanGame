@@ -6,6 +6,21 @@ message_shown2 = 0; // delete
 message_shown3 = 0; // delete confirmation
 load_path = "";
 
+function get_directory_contents(dname, pattern) {
+    var result = [];
+	var file = file_find_first(dname+pattern, fa_archive); // Buscar primer archivo
+	
+ 	while (file != "") {
+		var full_file_path = dname + "\\" + file;
+		
+		array_push(result, full_file_path);
+		file = file_find_next();
+	}
+    return result;
+}
+
+
+
 function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_load) {
 	
 	if (file_exists(dir_path)) {
@@ -121,6 +136,7 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 
 			global.current_sfx_index = ini_read_real("Settings", "CurrentSFXIndex", global.current_sfx_index);
 			global.current_bg_index = ini_read_real("Settings", "CurrentBGIndex", global.current_bg_index);
+			global.custom_sprites = json_parse(ini_read_string("Settings", "CustomSprites", json_stringify(global.custom_sprites)));
 			global.primary_color_yellow = ini_read_real("Settings", "PrimaryColor", global.primary_color_yellow);
 			global.secondary_color_purple = ini_read_real("Settings", "SecondaryColor", global.secondary_color_purple);
 			global.hue_shift = ini_read_real("Settings", "HueShift", global.hue_shift);
@@ -186,6 +202,7 @@ function save_ini_data(dir_path=working_directory + "save_data.ini") {
 	// Sección de colores de la interfaz
 	ini_write_real("Settings", "CurrentSFXIndex", global.current_sfx_index);
 	ini_write_real("Settings", "CurrentBGIndex", global.current_bg_index);
+	ini_write_string("Settings", "CustomSprites", json_stringify(global.custom_sprites));
 	ini_write_real("Settings", "PrimaryColor", global.primary_color_yellow);
 	ini_write_real("Settings", "SecondaryColor", global.secondary_color_purple);
 	ini_write_real("Settings", "HueShift", global.hue_shift);

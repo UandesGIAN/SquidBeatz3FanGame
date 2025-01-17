@@ -85,7 +85,7 @@ function export_chart_to_file(tempo, chart, start_point) {
 function load_chart_from_file() {
     // Solicita al usuario abrir un archivo, solo permite JSON
     var filter = "*.json|*.*";
-    var file_name = get_open_filename_ext(filter, string(global.current_chart_index) + "_song" + string(global.current_chart_index) + ".json", false, "Abre un json compatible.");
+    var file_name = get_open_filename_ext(filter, string(global.current_chart_index) + "_song" + string(global.current_chart_index) + ".json", false, global.current_language == "ENGLISH" ? "Open a chart json." : "Abre un json de charteo.");
 
     if (string_length(file_name) == 0) {
         show_message(global.current_language == "ENGLISH" ? "No file was selected." : "No se seleccionó ningún archivo.");

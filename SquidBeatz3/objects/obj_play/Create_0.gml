@@ -287,7 +287,9 @@ animation_timer = 0; // Timer para controlar el bucle
 current_sprite = -1;   // Sprite seleccionado
 animation_duration = 5000;
 prev_frame_timer = current_time;
+hold_keytimer = current_time;
 randomcolor = c_white;
+sprite_index_local = -1;
 
 // Para modo practica
 global.practice_mode = false; // Modo práctica deshabilitado por defecto
@@ -303,6 +305,7 @@ alarm_dir_path = "";
 
 delete_step = 0;
 global.delete_async_id = undefined;
+
 
 function export_song_files_to_directory(dir_path, song_start, song_end) {
     // Create necessary directories

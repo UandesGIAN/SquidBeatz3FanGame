@@ -160,28 +160,108 @@ if (obj_sync.game_win_for_first_time && total_elements > 0) {
 }
 
 if (play_music) {
-    if (current_time - prev_frame_timer > (current_sprite == spr_dance6 || current_sprite == spr_dance8 ? 34 : 31) && obj_sync.current_life > 0 && obj_sync.current_element_index < array_length(obj_sync.elements)) {
-		animation_timer++;
-		prev_frame_timer = current_time;
+	if (global.custom_sprites[0] == 0) {
+	    if (current_time - prev_frame_timer > (current_sprite == spr_dance6 || current_sprite == spr_dance8 ? 34 : 31) && obj_sync.current_life > 0 && obj_sync.current_element_index < array_length(obj_sync.elements)) {
+			animation_timer++;
+			prev_frame_timer = current_time;
+		}
+	
+	    // Si el temporizador ha llegado al final del ciclo o el sprite aún no se seleccionó
+	    if (current_sprite == -1) {
+	        // Selecciona un sprite aleatorio
+	        current_sprite = choose(global.dance_sprites[0][0], global.dance_sprites[0][1], global.dance_sprites[0][2], global.dance_sprites[0][3], global.dance_sprites[0][4], global.dance_sprites[0][5], global.dance_sprites[0][6], global.dance_sprites[0][7]);
+			animation_timer = 0; // Reinicia el contador
+			randomcolor = choose(global.primary_color_yellow, global.interface_color, global.secondary_color_purple);
+	    }
+		if (animation_timer >= sprite_get_number(current_sprite)) animation_timer = 0;
+	
+		draw_sprite_ext(current_sprite, animation_timer, 785, 65, 1.6, 1.6, 0, randomcolor, 1);
+	} else if (global.custom_sprites[0] == 2) {
+		var fps_to_sprite = 30;
+		var total_frames = sprite_get_number(current_sprite);
+		
+		if (total_frames < 10) {
+			fps_to_sprite = 31*86 / (total_frames*2); 
+		} else if (total_frames >= 10 && total_frames < 30) {
+			fps_to_sprite = 31+(31-total_frames);
+		} else if (total_frames >= 30 && total_frames < 60) {
+			fps_to_sprite = 31;
+		} else {
+			fps_to_sprite = 30;
+		}
+		
+		if (current_time - prev_frame_timer > fps_to_sprite && (obj_sync.current_life > 0 || global.practice_mode) && obj_sync.current_element_index < array_length(obj_sync.elements)) {
+			animation_timer++;
+			prev_frame_timer = current_time;
+		}
+	
+	    // Si el temporizador ha llegado al final del ciclo o el sprite aún no se seleccionó
+	    if (current_sprite == -1) {
+	        // Selecciona un sprite aleatorio
+	        current_sprite = choose(global.dance_sprites[1][0], global.dance_sprites[1][1], global.dance_sprites[1][2], global.dance_sprites[1][3], global.dance_sprites[1][4], global.dance_sprites[1][5], global.dance_sprites[1][6], global.dance_sprites[1][7]);
+
+			sprite_index_local = -1;
+			// Buscar el índice de current_sprite en global.dance_sprites[1]
+			for (var i = 0; i < 8; i++) {
+			    if (global.dance_sprites[0][i] == current_sprite) {
+			        sprite_index_local = i; // Guardar el índice
+			        break; // Salir del bucle una vez encontrado
+			    }
+			}
+			
+			animation_timer = 0; // Reinicia el contador
+			if (global.custom_sprites[1] || (!global.custom_sprites[1] && sprite_index_local != -1)) {
+				randomcolor = choose(global.primary_color_yellow, global.interface_color, global.secondary_color_purple);
+			} else {
+				randomcolor = c_white;
+			}
+	    }
+		if (animation_timer >= sprite_get_number(current_sprite)) animation_timer = 0;
+		
+		var x_scale = 1.6;
+		var y_scale = 1.6;
+		var y_sprite = 65;
+		if (sprite_get_width(current_sprite) < 128 || sprite_get_width(current_sprite) > 128) {
+			x_scale = (128*1.4)/sprite_get_width(current_sprite);
+		}
+		if (sprite_get_height(current_sprite) > 193 || sprite_get_height(current_sprite) < 192) {
+			y_scale = (193*1.4)/sprite_get_height(current_sprite);
+			y_sprite = 85;
+		}
+		
+		if (global.custom_sprites[1] && sprite_index_local == -1) {
+			shader_set(shader_silhouette);  // Usa el shader que hace el sprite negro
+			draw_sprite_ext(current_sprite, animation_timer, 785, y_sprite, x_scale, y_scale, 0, c_white, 1); // Dibuja el sprite negro
+			shader_reset();  // Resetear el shader
+
+			// Ahora, aplicamos el borde blanco
+			shader_set(shader_outline);
+			// Obtener la uniform de tamaño de textura y pasar el valor
+			var tex_size_uniform = shader_get_uniform(shader_outline, "u_texture_size");
+			shader_set_uniform_f(tex_size_uniform, sprite_get_width(current_sprite)*x_scale, sprite_get_height(current_sprite)*y_scale); // Tamaño de la textura
+
+			var r = color_get_red(randomcolor) / 255.0;   // Rojo normalizado
+			var g = color_get_green(randomcolor) / 255.0; // Verde normalizado
+			var b = color_get_blue(randomcolor) / 255.0;  // Azul normalizado
+
+			// Pasar el color del borde al shader
+			var edge_color_uniform = shader_get_uniform(shader_outline, "u_edge_color");
+			shader_set_uniform_f(edge_color_uniform, r, g, b, 1);  // Establecer el color del borde
+			draw_sprite_ext(current_sprite, animation_timer, 785, y_sprite, x_scale, y_scale, 0, randomcolor, 1);  // Dibuja el sprite con el borde blanco
+			shader_reset();  // Resetear el shader
+		} else {
+			draw_sprite_ext(current_sprite, animation_timer, 785, y_sprite, x_scale, y_scale, 0, randomcolor, 1);
+		}
+	} else {
+		current_sprite = -1;
 	}
-	
-    // Si el temporizador ha llegado al final del ciclo o el sprite aún no se seleccionó
-    if (current_sprite == -1) {
-        // Selecciona un sprite aleatorio
-        current_sprite = choose(spr_dance2, spr_dance1, spr_dance3, spr_dance4, spr_dance5, spr_dance6, spr_dance7, spr_dance8);
-		animation_timer = 0; // Reinicia el contador
-		randomcolor = choose(global.primary_color_yellow, global.interface_color, global.secondary_color_purple);
-    }
-	if (animation_timer >= sprite_get_number(current_sprite)) animation_timer = 0;
-	
-	draw_sprite_ext(current_sprite, animation_timer, 775, 60, 1.8, 1.8, 0, randomcolor, 1);
-	
 } else {
 	current_sprite = -1;
 }
 
+
 // Volumen
-if (keyboard_check_pressed(vk_subtract) || keyboard_check_pressed(vk_add)) volume_message_timer = current_time + 1000;
+if (keyboard_check(vk_subtract) || keyboard_check(vk_add)) volume_message_timer = current_time + 1000;
 draw_set_color(c_white);
 // Si ha pasado menos de 1 segundo, muestra el volumen actual
 if (volume_message_timer > current_time) {

@@ -4,7 +4,7 @@
 if (!message_shown) {
 
 	if (id == game_bar[0]) {
-		tiempo_inicio = ((global.start_point + global.base_x) / (global.tempo * proportion_bpm_to_speed * 60))
+		tiempo_inicio = ((global.start_point + global.base_x) / (global.tempo * proportion_bpm_to_speed * 60));
     
 		// TIPOS DE MOVIMIENTO
 		if (keyboard_check_pressed(vk_space)) {
@@ -245,33 +245,33 @@ if (!message_shown) {
 			for (var j = 0; j < array_length(global.current_chart); j++) {
 				var element = global.current_chart[j];
 			
-				if (current_time - sfx_delay >= 80 && element.index_type == 0 && (element.pos_x - (global.base_x div 1)) < 296 && (element.pos_x - (global.base_x div 1)) > 272) {
+				if (current_time - sfx_delay >= 80 && element.index_type == 0 && (element.pos_x - (global.base_x div 1)) < 310 && (element.pos_x - (global.base_x div 1)) > 296) {
 					if (prev_element_sound != j) {
 						prev_element_sound = j;
 						var sfx_id = audio_play_sound(global.sound_effects[global.current_sfx_index][1], 1, 0);
 						sfx_delay = current_time;
 					}
-				} else if (current_time - sfx_delay >= 80 && element.index_type == 1 &&  (element.pos_x - (global.base_x div 1)) < 296 && (element.pos_x - (global.base_x div 1)) > 272) {
+				} else if (current_time - sfx_delay >= 80 && element.index_type == 1 &&  (element.pos_x - (global.base_x div 1)) < 310 && (element.pos_x - (global.base_x div 1)) > 296) {
 					if (prev_element_sound != j) {
 						prev_element_sound = j;
 						var sfx_id = audio_play_sound(global.sound_effects[global.current_sfx_index][2], 1, 0);
 						sfx_delay = current_time;
 					}
 				
-				} else if (current_time - sfx_delay >= 80 && element.index_type > 1 && element.index_type < 4 && (element.pos_x - (global.base_x div 1)) < 296 && (element.pos_x - (global.base_x div 1)) > 272) {
+				} else if (current_time - sfx_delay >= 80 && element.index_type > 1 && element.index_type < 4 && (element.pos_x - (global.base_x div 1)) < 310 && (element.pos_x - (global.base_x div 1)) > 296) {
 					if (prev_element_sound != j) {
 						prev_element_sound = j;
 						var sfx_id = audio_play_sound(global.sound_effects[global.current_sfx_index][0], 1, 0);
 						sfx_delay = current_time;
 					}
-				} else if (current_time - sfx_delay >= 80 && element.index_type > 3 && element.index_type < 6 && (element.pos_x - (global.base_x div 1)) < 296 && (element.pos_x - (global.base_x div 1)) > 272) {
+				} else if (current_time - sfx_delay >= 80 && element.index_type > 3 && element.index_type < 6 && (element.pos_x - (global.base_x div 1)) < 310 && (element.pos_x - (global.base_x div 1)) > 296) {
 					if (prev_element_sound != j) {
 						prev_element_sound = j;
 						var sfx_id = audio_play_sound(global.sound_effects[global.current_sfx_index][1], 1, 0);
 						var sfx_id2 = audio_play_sound(global.sound_effects[global.current_sfx_index][0], 1, 0);
 						sfx_delay = current_time;
 					}
-				} else if (current_time - sfx_delay >= 80 && element.index_type > 5 && element.index_type < 8 && (element.pos_x - (global.base_x div 1)) < 296 && (element.pos_x - (global.base_x div 1)) > 272) {
+				} else if (current_time - sfx_delay >= 80 && element.index_type > 5 && element.index_type < 8 && (element.pos_x - (global.base_x div 1)) < 310 && (element.pos_x - (global.base_x div 1)) > 296) {
 					if (prev_element_sound != j) {
 						prev_element_sound = j;
 						var sfx_id = audio_play_sound(global.sound_effects[global.current_sfx_index][2], 1, 0);

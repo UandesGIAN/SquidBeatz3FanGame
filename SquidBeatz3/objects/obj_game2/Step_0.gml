@@ -61,6 +61,7 @@ if (global.current_song != undefined) {
 				obj_play.play_music = 0;
 				obj_play.sound_playing = -1;
 				obj_game2.processed_elements = [];
+				obj_play.sprite_index_local = -1;
 				
 				global.is_playing = 1;  // Iniciar juego
 				obj_play.sprite_index = spr_play;

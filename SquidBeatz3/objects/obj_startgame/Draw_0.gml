@@ -16,3 +16,13 @@ if (global.current_language == "ENGLISH") draw_text(room_width-20, room_height -
 else draw_text(room_width-20, room_height -50, "CARGANDO...");
 
 draw_set_halign(fa_left);
+
+
+if (current_load == 5) {
+	draw_set_color(global.primary_color_yellow);
+	if (global.current_language == "ENGLISH") draw_text(5, room_height -50, "LOADING: DONE.")
+	else draw_text(5, room_height -50, "CARGANDO: TERMINADO.");
+} else {
+	if (global.current_language == "ENGLISH") draw_text(5, room_height -50, "LOADING: Songs...SFX...Backgrounds...Dances...Save data...")
+	else draw_text(5, room_height -50, "CARGANDO: Canciones...SFX...Fondos...Bailes...Datos de guardado...");
+}

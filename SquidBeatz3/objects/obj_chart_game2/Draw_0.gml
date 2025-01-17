@@ -63,8 +63,8 @@ if (global.current_language  == "ENGLISH") draw_text(room_width-20, 440, "Curren
 else draw_text(room_width-20, 440, "Coordenada actual: " + string((global.base_x + mouse_x) div 1));
 draw_set_halign(fa_left);
 
-if ((!keyboard_check(ord("V")) && !keyboard_check(vk_control) && (keyboard_check_pressed(vk_subtract) || keyboard_check_pressed(vk_add)))) volume_message_timer = current_time + 1000;
-else if ((keyboard_check(ord("V")) && keyboard_check(vk_control) && (keyboard_check_pressed(vk_subtract) || keyboard_check_pressed(vk_add)))) volume_message_timer = current_time + 1000;
+if ((!keyboard_check(ord("V")) && !keyboard_check(vk_control) && (keyboard_check(vk_subtract) || keyboard_check(vk_add)))) volume_message_timer = current_time + 1000;
+else if ((keyboard_check(ord("V")) && keyboard_check(vk_control) && (keyboard_check(vk_subtract) || keyboard_check(vk_add)))) volume_message_timer = current_time + 1000;
 
 // Si ha pasado menos de 1 segundo, muestra el volumen actual
 if (volume_message_timer > current_time) {
@@ -80,8 +80,8 @@ if (volume_message_timer > current_time) {
 	    draw_text(800, 365, volume_text);
 	} else {
 		var padding = 10; // Espaciado interno del rectángulo
-		var volume_text = "VOLUMEN: " + string(audio_sound_get_gain(obj_chart_game.current_song));
-		if (global.current_language  == "ENGLISH") volume_text = "VOLUME: " + string(audio_sound_get_gain(obj_chart_game.current_song));
+		var volume_text = "VOLUMEN: " + string(audio_get_master_gain(0));
+		if (global.current_language  == "ENGLISH") volume_text = "VOLUME: " + string(audio_get_master_gain(0));
 	    var text_width = string_width(volume_text);
 
 		// Dibujar volumen

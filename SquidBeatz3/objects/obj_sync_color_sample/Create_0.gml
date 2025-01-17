@@ -2,7 +2,7 @@
 // You can write your code in this editor
 
 blocked = 0;
-botones = [inst_3C176DDB,inst_166D24AD,inst_3CE10DF4,inst_178EA49E,inst_C7C044D, inst_6E921BA9, inst_634093B4,inst_ACAC26,inst_2BA4B279];
+botones = [inst_3C176DDB,inst_166D24AD,inst_3CE10DF4,inst_178EA49E, inst_C7C044D, inst_634093B4, inst_5C0EDD46, inst_6E921BA9, inst_ACAC26, inst_2BA4B279];
 indice_actual = 0;
 if (global.is_gamepad) botones[indice_actual].seleccionado = 1;
 
