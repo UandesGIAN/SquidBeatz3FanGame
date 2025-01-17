@@ -162,16 +162,16 @@ if (keyboard_check_pressed(vk_shift) && !keyboard_check(vk_control) && !keyboard
 }
 
 // Volume control
-if (keyboard_check_pressed(vk_subtract) && !keyboard_check(vk_control)) {
+if (keyboard_check_pressed(vk_subtract) && !keyboard_check(vk_control) && global.current_chart_index != 0 ) {
 	volume_count -= 0.2;
 	audio_set_master_gain(0, max(0, volume_count));
 }
-if (keyboard_check_pressed(vk_add) && !keyboard_check(vk_control)) {
+if (keyboard_check_pressed(vk_add) && !keyboard_check(vk_control) && global.current_chart_index != 0 ) {
 	volume_count += 0.2;
 	audio_set_master_gain(0, min(volume_count, 2));
 }
 // Sound delay control
-if (keyboard_check(vk_control)) {
+if (keyboard_check(vk_control) && global.current_chart_index != 0 ) {
 	if (keyboard_check_pressed(vk_add)) {
 		global.sound_delay += 0.05;
 		if (global.sound_delay > 10) global.sound_delay = 10;
@@ -262,7 +262,7 @@ if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !global.is_gamepad 
         handle_delete_files(global.current_song_index, global.current_song_index);
     }
 }
-if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !global.is_gamepad && keyboard_check_pressed(ord("S")) && !play_music && check_permissions()) {
+if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !global.is_gamepad && keyboard_check_pressed(ord("S")) && !play_music && check_permissions() && !global.practice_mode) {
     show_message(global.current_language == "ENGLISH" ? "SAVE PROGRESS DATA\n\nYou will now be prompted to save a file containing information about each song, your score, and any changes you’ve made to the settings. To load this file, you must do so from the settings menu using the mouse and keyboard.\nIf you wish to back up your data and game files, you must export the songs first and then load the save file. This is because, for the data to load, the song names at the save file and at the game files are compared, if they match, the data is loaded; else, it is not.\n\n" : "GUARDAR DATOS DE PROGRESO\n\nA continuación se te pedirá que guardes un archivo de guardado con información de cada canción, tu puntaje y los cambios que hayas realizado en los ajustes. Para cargar este archivo debes hacerlo desde los ajustes y usando el mouse y teclado.\nSi deseas guardar una copia de seguridad de tus datos y los archivos del juego, debes exportar las canciones primero, luego cargar el archivo de guardado, pues para que se carguen los datos, se comparan los nombres de canciones en el archivo de guardado y en los archivos del juego, si coinciden, se cargan los datos, si no, no.");
     
 	// Abrir explorador de archivos para guardar
@@ -280,6 +280,90 @@ if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !global.is_gamepad 
 		show_message(global.current_language == "ENGLISH" ? "No file was created." : "No se creó ningún archivo.");
 	}
 }
-if (keyboard_check(vk_control) && !global.is_gamepad && keyboard_check_pressed(ord("L")) && !play_music && check_permissions()) {
-    obj_handle_savedata.load_ini_data(,"all");
+if (keyboard_check(vk_control) && !global.is_gamepad && keyboard_check_pressed(ord("L")) && !play_music && check_permissions() && global.current_song_index != 0 && !global.practice_mode) {
+	if (1 == show_question(global.current_language == "ENGLISH" ? "LOAD GAME PROGRESS\n\nNext, you will be asked to choose a save file (.ini). Then, the PROGRESS for the current song is replaced.\n\nDo you wish to continue?" : "CARGAR DATOS DE GUARDADO\n\nA continuación se pide que elijas un archivo de guardado .ini, luego se carga el PROGRESO para la canción actual.\n\n¿Deseas continuar?")) {
+		var filter = "*.ini|*.*";
+		var file_path = get_open_filename_ext(filter, "save_data.ini", false, global.current_language == "ENGLISH" ? "Open a compatible .ini file" : "Abre un archivo .ini compatible");
+				
+		if (string_length(file_path) > 0) {
+			if (string_pos(".ini", file_path)) {
+		        ini_open(file_path);
+		
+				var array_string = ini_read_string("Main", "SongNames", "[]");
+				array_string = string_replace_all(array_string, "[", "[\"");
+			    array_string = string_replace_all(array_string, "]", "\"]");
+				array_string = string_replace_all(array_string, ", ", "\", \"");
+				var loaded_songs = json_parse(array_string);
+				for (var i = 0; i < array_length(loaded_songs); i++) {
+					loaded_songs[i] = string_copy(loaded_songs[i], 4, string_length(loaded_songs[i]) - 2);
+				}
+				var real_song = string_copy(global.song_text_list[global.current_song_index], 4, string_length(global.song_text_list[global.current_song_index]) - 2);
+				
+				var json_string = ini_read_string("Main", "GamePoints", global.game_points);
+				json_string = string_replace_all(json_string, "normal", "\"normal\"");
+				json_string = string_replace_all(json_string, "hard", "\"hard\"");
+				json_string = string_replace_all(json_string, "easy", "\"easy\"");
+				json_string = string_replace_all(json_string, "count_silver", "\"count_silver\"");
+				json_string = string_replace_all(json_string, "count_gold", "\"count_gold\"");
+				json_string = string_replace_all(json_string, "total_hits", "\"total_hits\"");
+			
+				var loaded_game_points = json_parse(json_string);
+			
+				json_string = ini_read_string("Main", "WinsLifebar", global.wins_lifebar);
+				json_string = string_replace_all(json_string, "normal", "\"normal\"");
+				json_string = string_replace_all(json_string, "hard", "\"hard\"");
+				json_string = string_replace_all(json_string, "easy", "\"easy\"");
+			
+				var loaded_wins = json_parse(json_string);
+			
+				var dif = ["easy", "normal", "hard"];
+			
+				for (var i = 1; i < array_length(loaded_songs); i++) {
+					var current_loaded_song = loaded_songs[i];
+					if (current_loaded_song == real_song) {
+						for (var d = 0; d < 3; d++) {
+							var difficulty = dif[d];
+							global.game_points[$ difficulty].count_silver[global.current_song_index] = loaded_game_points[$ difficulty].count_silver[i];
+							global.game_points[$ difficulty].count_gold[global.current_song_index] = loaded_game_points[$ difficulty].count_gold[i];
+							global.game_points[$ difficulty].total_hits[global.current_song_index] = loaded_game_points[$ difficulty].total_hits[i];
+							global.wins_lifebar[$ difficulty][global.current_song_index] = loaded_wins[$ difficulty][i];
+						}
+						break;
+					}
+				}
+				ini_close();
+			    show_message(global.current_language == "ENGLISH"
+			        ? "Game data loaded successfully from " + string(file_path) + "."
+			        : "Datos de guardado cargados exitosamente desde " + string(file_path) + ".");
+			} else {
+				show_message(global.current_language == "ENGLISH" ? "The selected file is invalid. Please select a file with the .ini extension." : "El archivo seleccionado no es válido. Por favor, selecciona un archivo con la extensión .ini.");
+			}
+		} else {
+			show_message(global.current_language == "ENGLISH" ? "No file was selected." : "No se seleccionó ningún archivo.");
+		}
+	}
+	
+		if (file_exists(dir_path)) {
+	        ini_open(dir_path);
+		
+			var array_string = ini_read_string("Main", "SongNames", "[]");
+			array_string = string_replace_all(array_string, "[", "[\"");
+		    array_string = string_replace_all(array_string, "]", "\"]");
+		    array_string = string_replace_all(array_string, ", ", "\", \"");
+			var loaded_songs = json_parse(array_string);
+			for (var i = 0; i < array_length(loaded_songs); i++) {
+			    loaded_songs[i] = string_copy(loaded_songs[i], 4, string_length(loaded_songs[i]) - 2);
+			}
+			var real_songs = [];
+			for (var i = 0; i < array_length(global.song_text_list); i++) {
+			    var real_song_name = string_copy(global.song_text_list[i], 4, string_length(global.song_text_list[i]) - 2);
+				array_push(real_songs, real_song_name);
+			}
+		
+	show_message(global.current_language == "ENGLISH"
+		? "Game data loaded successfully from " + string(dir_path) + "."
+		: "Datos de guardado cargados exitosamente desde " + string(dir_path) + ".");
+	}
+	
+	
 }

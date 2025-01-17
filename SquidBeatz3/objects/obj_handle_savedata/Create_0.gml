@@ -35,7 +35,7 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 		}
 		var real_songs = [];
 		for (var i = 0; i < array_length(global.song_text_list); i++) {
-		    var real_song_name = string_copy(real_songs[i], 4, string_length(real_songs[i]) - 2);
+		    var real_song_name = string_copy(global.song_text_list[i], 4, string_length(global.song_text_list[i]) - 2);
 			array_push(real_songs, real_song_name);
 		}
 		

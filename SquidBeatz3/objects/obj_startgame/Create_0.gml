@@ -9,6 +9,7 @@ if (file_exists(working_directory+"save_data.ini")) {
 
 
 current_load = 0;
+gradual_load = 0;
 time_delay = current_time;
 
 if (!variable_global_exists("current_language")) {
@@ -141,6 +142,7 @@ function load_songs_from_directory(dir_path=working_directory+"sounds\\") {
 
     // Validar charteos
     for (var i = 0; i < array_length(charts_files); i++) {
+		gradual_load = i/array_length(charts_files)*0.5; 
         var file_name = charts_files[i];
         var json_file = file_text_open_read(file_name);
         var json_content = "";
@@ -252,6 +254,7 @@ function load_songs_from_directory(dir_path=working_directory+"sounds\\") {
     }
 
     for (var i = 0; i < array_length(charts_files); i++) {
+		gradual_load = 0.5 + 0.5*i/array_length(charts_files); 
         var chart_file = charts_files[i];
         var json_file = file_text_open_read(chart_file);
         var json_content = "";
@@ -305,6 +308,7 @@ function load_sfx(dir_path=working_directory+"sounds\\sfx\\") {
 					dir_path+"user2\\snare_drum.ogg"]
     
     for (var i = 0; i < 6; i++) {
+		gradual_load = i / 6;
 		var file_path = sfx_files[i];
 		var sound_id = undefined;
 		
@@ -324,7 +328,9 @@ function load_bg(dir_path=working_directory+"sprites\\") {
 					dir_path+"user1\\background.jpg",
 					dir_path+"user2\\background.png",
 					dir_path+"user2\\background.jpg"]
+					
 	for (var i = 0; i < 4; i++) {
+		gradual_load = i / 4;
 		var file_path = bg_files[i];
 		var sprite_id = undefined;
 		
@@ -351,6 +357,7 @@ function load_dances(dir_path=working_directory+"sprites\\") {
 					dir_path+"custom_dances\\dance8.gif",]
 	
 	for (var i = 0; i < 8; i++) {
+		gradual_load = i / 8;
 		var file_path = dance_files[i];
 		var gif_frame_sprites = undefined;
 		var gif_delays = [0]; // delays per frame, in centiseconds
