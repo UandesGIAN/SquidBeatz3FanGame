@@ -30,8 +30,16 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 	    array_string = string_replace_all(array_string, "]", "\"]");
 	    array_string = string_replace_all(array_string, ", ", "\", \"");
 		var loaded_songs = json_parse(array_string);
+		for (var i = 0; i < array_length(loaded_songs); i++) {
+		    loaded_songs[i] = string_copy(loaded_songs[i], 4, string_length(loaded_songs[i]) - 2);
+		}
+		var real_songs = [];
+		for (var i = 0; i < array_length(global.song_text_list); i++) {
+		    var real_song_name = string_copy(real_songs[i], 4, string_length(real_songs[i]) - 2);
+			array_push(real_songs, real_song_name);
+		}
 		
-		show_debug_message(json_stringify(global.song_text_list) + " . . . . . " + json_stringify(loaded_songs));
+		show_debug_message(json_stringify(real_songs) + " . . . . . " + json_stringify(loaded_songs));
         // Cargar según el tipo especificado
         if (type_of_load == "all" || type_of_load == "charts") {
             // Cargar datos de "Charts"
@@ -51,13 +59,13 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			var dif = ["easy", "normal", "hard"];
 			for (var i = 1; i < array_length(loaded_songs); i++) {
 				var current_loaded_song = loaded_songs[i];
-				for (var j = 1; j < array_length(global.song_text_list); j++) {
-					var real_song = global.song_text_list[j];
+				for (var j = 1; j < array_length(real_songs); j++) {
+					var real_song = real_songs[j];
 					if (current_loaded_song == real_song) {
 						var save_data_restart = 0;
 						for (var d = 0; d < 3; d++) {
 							var difficulty = dif[d];
-							if (type_of_load == "charts" && array_length(global.charts[$ difficulty].charts) != array_length(loaded_charts[$ difficulty].charts)) {
+							if (type_of_load == "charts" && array_length(global.charts[$ difficulty].charts[j]) != array_length(loaded_charts[$ difficulty].charts[i])) {
 								save_data_restart = j;
 								global.game_points[$ difficulty].count_silver[j] = 0;
 								global.game_points[$ difficulty].count_gold[j] = 0;
@@ -150,8 +158,8 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			
 			for (var i = 1; i < array_length(loaded_songs); i++) {
 				var current_loaded_song = loaded_songs[i];
-				for (var j = 1; j < array_length(global.song_text_list); j++) {
-					var real_song = global.song_text_list[j];
+				for (var j = 1; j < array_length(real_songs); j++) {
+					var real_song = real_songs[j];
 					if (current_loaded_song == real_song) {
 						for (var d = 0; d < 3; d++) {
 							var difficulty = dif[d];
