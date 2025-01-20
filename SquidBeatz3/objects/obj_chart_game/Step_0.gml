@@ -73,7 +73,7 @@ if (!message_shown) {
 		}
 	
 		// AJUSTAR VELOCIDAD
-		if (keyboard_check(vk_control) && !keyboard_check(ord("V"))) {
+		if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !keyboard_check(ord("V"))) {
 			if (keyboard_check_pressed(vk_add) ) {
 				global.tempo++;
 				if (global.tempo > 300) global.tempo = 300;
@@ -141,7 +141,7 @@ if (!message_shown) {
 		
 		}
 	
-		if (keyboard_check_pressed(ord("X"))) {
+		if (keyboard_check_pressed(ord("X")) && !keyboard_check(vk_control)) {
 			if (!toggle_checkpoint) {
 			    mode = "manual";
 			    audio_stop_sound(sound_id);
@@ -179,7 +179,7 @@ if (!message_shown) {
 		}
 
 	
-		if (keyboard_check_pressed(ord("C"))) {
+		if (!keyboard_check(vk_control) && keyboard_check_pressed(ord("C"))) {
 			if (checkpoint_start != -1) {
 				if (toggle_checkpoint) toggle_checkpoint = 0;
 				checkpoint_start = -1;

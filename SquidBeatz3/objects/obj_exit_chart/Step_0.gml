@@ -156,7 +156,7 @@ if (message_shown) {
 }
 
 // Mostrar el mensaje si se presiona esc
-if ((keyboard_check_pressed(vk_escape) || (keyboard_check_pressed(vk_shift) && obj_chart_game2.editing_element == -1)) && !load_shown) {
+if ((keyboard_check_pressed(vk_escape) || (keyboard_check_pressed(vk_shift) && !keyboard_check(vk_control) && !keyboard_check_pressed(ord("Z")) && obj_chart_game2.editing_element == -1)) && !load_shown) {
     if (message_shown) {
 		with (obj_editor_button) {
 			blocked = 0;

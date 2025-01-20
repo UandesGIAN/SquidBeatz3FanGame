@@ -7,7 +7,6 @@ import numpy as np
 import tkinter as tk
 import math
 import zipfile
-import numpy as np
 import pywt
 import librosa
 from scipy import signal
@@ -173,60 +172,39 @@ def process_audio_to_matrix(file_path, output_json):
     with open(output_json, "w") as json_file:
         json.dump(visualizer_data, json_file, indent=4)
 
-
-def generate_easy_chart(audio_path, bpm, start):
+def generate_chart(audio_path, bpm):
+    # Cargar el audio
     y, sr = librosa.load(audio_path, sr=None)
+    hop_length = int(sr * 0.01)  # Ventana de 0.01 segundos
+    
+    # Espectrograma y detección de transitorios
     onset_env = librosa.onset.onset_strength(y=y, sr=sr)
-    onset_frames = librosa.onset.onset_detect(onset_envelope=onset_env, sr=sr, units='time')
-
-    # Calcular características adicionales
-    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
-    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, units='time')
-    beat_intervals = np.diff(beat_frames) if len(beat_frames) > 1 else [0]
-
-    stft = np.abs(librosa.stft(y))
-    freqs = librosa.fft_frequencies(sr=sr)
-    times = librosa.times_like(stft[0], sr=sr)
-
+    peaks = librosa.util.peak_pick(onset_env, pre_max=3, post_max=3, pre_avg=3, post_avg=3, delta=0.1, wait=1)
+    times = librosa.frames_to_time(peaks, sr=sr, hop_length=hop_length)
+    
+    # Espectrograma para clasificar sonidos
+    stft = np.abs(librosa.stft(y, hop_length=hop_length))
+    frequencies = librosa.fft_frequencies(sr=sr)
+    
     chart = []
-    previous_note_pos = -100  # Posición inicial fuera del rango de aparición
-    repetition_count = 0
-
-    for onset in onset_frames:
-        closest_idx = np.argmin(np.abs(times - onset))
-        low_energy = np.sum(stft[freqs < 200, closest_idx])
-        mid_energy = np.sum(stft[(freqs >= 200) & (freqs < 2000), closest_idx])
-        high_energy = np.sum(stft[freqs >= 2000, closest_idx])
-        avg_rms = rms[closest_idx] if closest_idx < len(rms) else 0
-        beat_interval = beat_intervals[closest_idx % len(beat_intervals)] if beat_intervals.size > 0 else 0
-
-        # Determinar tipo de nota con mayor variedad
-        if repetition_count >= 4 and onset - previous_note_pos < 50:
-            # Si hay repetición reciente, generar notas altas o especiales
-            index_type = np.random.randint(4, 8)
-            repetition_count = 0
-        elif high_energy > mid_energy and high_energy > low_energy:
-            index_type = np.random.randint(0, 2)  # Notas bajas o normales
-        elif low_energy > mid_energy and low_energy > high_energy:
+    for t in times:
+        frame = int(t * sr / hop_length)
+        spectrum = stft[:, frame]
+        
+        # Clasificar según frecuencias predominantes
+        if np.max(spectrum[frequencies < 100]) > 0.7:  # Bombo
+            index_type = 1
+        elif np.max(spectrum[(frequencies > 100) & (frequencies < 300)]) > 0.7:  # Snare
+            index_type = 0
+        elif np.max(spectrum[(frequencies > 5000)]) > 0.7:  # Hi-hat
             index_type = 2
-        elif mid_energy > high_energy and mid_energy > low_energy:
-            index_type = np.random.randint(1, 3)
-        elif avg_rms > 0.05 and beat_interval < 0.5:
-            index_type = np.random.choice([2, 4, 5])  # Ritmos marcados
         else:
-            index_type = np.random.randint(4, 8)  # Notas especiales
-
-        # Posición en el chart (relativa al tempo y sincronización)
-        pos_x = round((onset * (bpm * 132 / 60)), 1)
-
-        # Evitar duplicados consecutivos
-        if pos_x - previous_note_pos >= 30:  # Mantener espacio mínimo entre notas
-            chart.append({"pos_x": pos_x, "index_type": index_type})
-            previous_note_pos = pos_x
-            repetition_count += 1
-        else:
-            repetition_count = 0
-
+            continue
+        
+        # Calcular pos_x
+        pos_x = round(t, 2) * (bpm * 132 / 60)
+        chart.append({"pos_x": pos_x, "index_type": index_type})
+    
     return chart
 
 # Export files
@@ -294,23 +272,23 @@ def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, outpu
             # BPM y Chart JSON
             bpm_found = calculate_bpm(file_path)
             start_found = calculate_sync_tempo(bpm_found) if bpm_found else None
-            easy_chart = generate_easy_chart(file_path, bpm_found, start_found)
+            easy_chart = generate_chart(file_path, bpm_found)
 
             chart_data = {
                 "easy": {
                     "chart": easy_chart,
                     "tempo": bpm_found,
-                    "start_point": start_found
+                    "start_point": 272
                 },
                 "normal": {
                     "chart": [],
                     "tempo": bpm_found,
-                    "start_point": start_found
+                    "start_point": 272
                 },
                 "hard": {
                     "chart": [],
                     "tempo": bpm_found,
-                    "start_point": start_found
+                    "start_point": 272
                 }
             }
             chart_file_name = f"{index}_song{index}.json"
@@ -401,6 +379,8 @@ def open_and_convert():
     clean_up(os.path.join(input_folder, 'sounds/'))
 
     messagebox.showinfo("Conversion Completed", f"Files have been successfully converted and saved in {zip_file_path}.")
+    export_folder = os.path.dirname(zip_file_path)
+    os.startfile(export_folder)
 
 def exit_program():
     root.destroy()

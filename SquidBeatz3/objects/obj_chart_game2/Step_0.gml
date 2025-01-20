@@ -9,13 +9,20 @@ if (!message_shown) {
 			if (selected_type == 0 || selected_type == 4 || selected_type == 5) audio_play_sound(global.sound_effects[global.current_sfx_index][1], 1, 0);
 			if (selected_type == 1 || selected_type == 6 || selected_type == 7) audio_play_sound(global.sound_effects[global.current_sfx_index][2], 1, 0);
 			if (selected_type >= 2) audio_play_sound(global.sound_effects[global.current_sfx_index][0], 1, 0);
-	
+		
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			
 			add_charteo_element(selected_type, (mouse_x + global.base_x) div 1);
 			editing_element = array_length(elements) - 1;
 			editing_elements = [];
 			selected_element = 0;
-			prev_type_backup = -1;
-			prev_pos_x_backup = -1;
+			array_push(prev_actions, {action: "add", data: elements[editing_element]});
+			prev_actions_index = array_length(prev_actions)-1;
 		} else {
 			if (array_length(elements) > 0 && editing_element != -1  && array_length(editing_elements) == 0) {
 				if (abs(elements[editing_element].pos_x div 1 - (mouse_x + global.base_x) div 1) > 20) {
@@ -23,12 +30,18 @@ if (!message_shown) {
 					if (selected_type == 1 || selected_type == 6 || selected_type == 7) audio_play_sound(global.sound_effects[global.current_sfx_index][2], 1, 0);
 					if (selected_type >= 2) audio_play_sound(global.sound_effects[global.current_sfx_index][0], 1, 0);
 	
+					if (prev_actions_index < array_length(prev_actions)-1) {
+						var remov = array_length(prev_actions)-1-prev_actions_index;
+						for (var i = 0; i <= remov; i++) {
+							array_pop(prev_actions);
+						}
+					}
 					add_charteo_element(selected_type, (mouse_x + global.base_x) div 1);
 					editing_element = array_length(elements) - 1;
 					editing_elements = [];
 					selected_element = 0;
-					prev_type_backup = -1;
-					prev_pos_x_backup = -1;
+					array_push(prev_actions, {action: "add", data: elements[editing_element]});
+					prev_actions_index = array_length(prev_actions)-1;
 				}
 			} else if (array_length(elements) > 0 && array_length(editing_elements) > 0) {
 				var found_element = -1;
@@ -44,12 +57,19 @@ if (!message_shown) {
 					if (selected_type == 1 || selected_type == 6 || selected_type == 7) audio_play_sound(global.sound_effects[global.current_sfx_index][2], 1, 0);
 					if (selected_type >= 2) audio_play_sound(global.sound_effects[global.current_sfx_index][0], 1, 0);
 					
+					if (prev_actions_index < array_length(prev_actions)-1) {
+						var remov = array_length(prev_actions)-1-prev_actions_index;
+						for (var i = 0; i <= remov; i++) {
+							array_pop(prev_actions);
+						}
+					}
+					
 					add_charteo_element(selected_type, (mouse_x + global.base_x) div 1);
 					editing_element = array_length(elements) - 1;
 					editing_elements = [];
 					selected_element = 0;
-					prev_type_backup = -1;
-					prev_pos_x_backup = -1;
+					array_push(prev_actions, {action: "add", data: elements[editing_element]});
+					prev_actions_index = array_length(prev_actions)-1;
 				}
 			}
 		}
@@ -143,14 +163,102 @@ if (!message_shown) {
 			    array_sort(sort_elements_max_min_2, function(a, b) { return b.pos_x - a.pos_x; });
 			}
 		}
+		
+		if (pos_edited) {
+			if (current_time - current_key_timer < 500) {
+				prev_pos_x_move = element.pos_x;
+			}
+		}
+		
+		
+		if (current_time - current_key_timer < 500 && (keyboard_check_released(vk_left) || keyboard_check_released(vk_right) || keyboard_check_released(ord("A")) || keyboard_check_released(ord("D"))) ) {
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			
+			array_push(prev_actions, {action: "move", data: [editing_element, element.pos_x, prev_pos_x_move]}); // index, current_pos_x, prev_pos_x
+			prev_actions_index = array_length(prev_actions)-1;
+			prev_pos_x_move = 0;
+		} else if (current_time - current_key_timer > 500 && (keyboard_check_released(vk_left) || keyboard_check_released(vk_right) || keyboard_check_released(ord("A")) || keyboard_check_released(ord("D"))) ) {
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			
+			array_push(prev_actions, {action: "move", data: [editing_element, element.pos_x, prev_pos_x_move]}); // index, current_pos_x, prev_pos_x
+			prev_actions_index = array_length(prev_actions)-1;
+			prev_pos_x_move = 0;
+		}
 	
 		// Eliminar elemento si supr
 		if (keyboard_check_pressed(vk_delete) || (keyboard_check(vk_control) && keyboard_check_pressed(ord("D")))) {
-			prev_type_backup = element.index_type;
-			prev_pos_x_backup = element.pos_x;
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			array_push(prev_actions, {action: "remove", data: element});
+			prev_actions_index = array_length(prev_actions)-1;
 		    remove_charteo_element({"index_type":  element.index_type, "pos_x": element.pos_x});
 			editing_element = -1;
 			editing_elements = [];
+		}
+		
+		// Cambiar tipo segun número
+		var numbers = ["1", "2", "3", "4", "5", "6", "7", "8"];
+		
+		for (var i = 0; i < 8; i++) {
+			if (keyboard_check_pressed(ord(numbers[i]))) {
+				if (prev_actions_index < array_length(prev_actions)-1) {
+					var remov = array_length(prev_actions)-1-prev_actions_index;
+					for (var j = 0; j <= remov; j++) {
+						array_pop(prev_actions);
+					}
+				}
+				
+				array_push(prev_actions, {action: "change", data: [editing_element, i, element.index_type]}); // [index, current_index_type, prev_index_type]
+				
+				element.index_type = i;
+				prev_actions_index = array_length(prev_actions)-1;
+				break;
+			}
+		}
+		
+		// Copiar 1
+		if (keyboard_check(vk_control) && keyboard_check_pressed(ord("C"))) {
+			copied_elements = [];
+			var index_e = 0;
+			for (var j = 0; j < array_length(elements); j++) {
+				var element2 = elements[j];
+				if (element == element2) {
+					index_e = j;
+					break;
+				}
+			}
+			array_push(copied_elements, {tipo: "copy", data: index_e});
+			copy_type = 0;
+		}
+		
+		if (keyboard_check(vk_control) && keyboard_check_pressed(ord("X"))) {
+			copied_elements = [];
+			array_push(copied_elements, {tipo: "cut", data: element});
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			array_push(prev_actions, {action: "remove", data: element});
+			remove_charteo_element(element);
+			editing_element = -1;
+			editing_elements = [];
+			copy_type = 2;
 		}
 		
 		if (keyboard_check_pressed(vk_escape)) editing_element = -1;
@@ -184,12 +292,13 @@ if (!message_shown) {
 	    editing_element = -1; 
 	} else if (editing_element != -1 && mouse_check_button(mb_left) && mouse_y > 512 && mouse_y < 642) {
 	    var element = elements[editing_element];
-
+		
 	    // Verificar si el mouse está sobre el elemento en el eje X
 	    if (abs(element.pos_x div 1 - (mouse_x + global.base_x) div 1) <= 20) {
 	        // Evitar crash al mover repetidamente en la misma posición
 	        if (!click_to_move) {
 	            click_to_move = 1;
+				prev_pos_x_move = element.pos_x;
 	        }
 	    }
 
@@ -261,6 +370,18 @@ if (!message_shown) {
 	    }
 	} else if (click_to_move && mouse_check_button_released(mb_left) && array_length(editing_elements) == 0) {
 	    click_to_move = 0;
+		if (elements[editing_element].pos_x != prev_pos_x_move) {
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			
+			array_push(prev_actions, {action: "move", data: [editing_element, elements[editing_element].pos_x, prev_pos_x_move]}); // index, current_pos_x, prev_pos_x
+			prev_actions_index = array_length(prev_actions)-1;
+		}
+		prev_pos_x_move = 0;
 	}
 
 	
@@ -356,6 +477,7 @@ if (!message_shown) {
 	            var index = editing_elements[i];
 	            var element = elements[index];
 	            array_push(offsets, element.pos_x - mouse_x);
+				array_push(prev_pos_x_move_multiple, element.pos_x);
 	        }
 	    }
 		
@@ -409,6 +531,23 @@ if (!message_shown) {
 		}
 	} else if (mouse_check_button_released(mb_left) && click_to_move && array_length(editing_elements) > 0) {
 	    click_to_move = false;
+		var prev_actions_local = [];
+		for (var i = 0; i < array_length(editing_elements); i++) {
+	        var index = editing_elements[i];
+	        var element = elements[index];
+			if (element.pos_x != prev_pos_x_move_multiple[i]) array_push(prev_actions_local, {action: "move", data: [index, element.pos_x, prev_pos_x_move_multiple[i]]}); // index, current_pos_x, prev_pos_x
+		}
+		if (array_length(prev_actions_local) > 0) {
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			array_push(prev_actions, {action: "move_multiple", data: prev_actions_local});
+			prev_actions_index = array_length(prev_actions)-1;
+		}
+		prev_pos_x_move_multiple = [];
 	    offsets = [];
 	}
 
@@ -416,6 +555,8 @@ if (!message_shown) {
 	// EDITAR VARIOS ELEMENTOS A LA VEZ
 	if (array_length(editing_elements) > 0 && array_length(elements) > 0) {
 		var pos_edited = 0;
+		var prev_actions_local = [];
+		//var prev_pos_x_move_local = 0;
 	    for (var j = 0; j < array_length(editing_elements); j++) {
 			if (editing_elements[j] < array_length(elements)) {
 				var element = elements[editing_elements[j]];
@@ -479,6 +620,16 @@ if (!message_shown) {
 				            }
 				        }
 			        }
+					
+					if (current_time - current_key_timer < 500 && (keyboard_check_pressed(vk_left) || keyboard_check_pressed(vk_right) || keyboard_check_pressed(ord("A")) || keyboard_check_pressed(ord("D")))) {
+						array_push(prev_pos_x_move_multiple, element.pos_x);
+					}
+					
+					if (current_time - current_key_timer < 500 && (keyboard_check_released(vk_left) || keyboard_check_released(vk_right) || keyboard_check_released(ord("A")) || keyboard_check_released(ord("D"))) ) {
+						array_push(prev_actions_local, {action: "move", data: [editing_elements[j], element.pos_x, prev_pos_x_move_multiple[j]]}); // index, current_pos_x, prev_pos_x
+					} else if (current_time - current_key_timer > 500 && (keyboard_check_released(vk_left) || keyboard_check_released(vk_right) || keyboard_check_released(ord("A")) || keyboard_check_released(ord("D"))) ) {
+						array_push(prev_actions_local, {action: "move", data: [editing_elements[j], element.pos_x, prev_pos_x_move_multiple[j]]}); // index, current_pos_x, prev_pos_x
+					}
 				}
 			}
 		}
@@ -512,13 +663,86 @@ if (!message_shown) {
 				if (editing_elements[j] < array_length(elements)) {
 					show_debug_message("j " + string(editing_elements[j]));
 					var element = elements[editing_elements[j]];
-				
+					
+					array_push(prev_actions_local, {action: "remove", data: element});
 				    remove_charteo_element({"index_type":  element.index_type, "pos_x": element.pos_x});
 				}
 			}
 			editing_element = -1;
 			editing_elements = [];
 			show_debug_message(json_stringify(editing_elements));
+		}
+		
+		// Cambiar tipo segun número
+		var numbers = ["1", "2", "3", "4", "5", "6", "7", "8"];
+		for (var i = 0; i < 8; i++) {
+			if (keyboard_check_pressed(ord(numbers[i]))) {
+				array_sort(editing_elements, function(a, b) { return b - a; });
+				for (var j = 0; j < array_length(editing_elements); j++) {
+					if (editing_elements[j] < array_length(elements)) {
+						var element = elements[editing_elements[j]];
+						
+						array_push(prev_actions_local, {action: "change", data: [editing_elements[j], i, element.index_type]}); // [index, prev_index_type, current_index_type]
+					    element.index_type = i;
+					}
+				}
+			}
+		}
+		
+		if (keyboard_check(vk_control) && keyboard_check_pressed(ord("C"))) {
+			copied_elements = [];
+			array_sort(editing_elements, function(a, b) { return a-b; });
+			for (var j = 0; j < array_length(editing_elements); j++) {
+				if (editing_elements[j] < array_length(elements)) {
+					var element = elements[editing_elements[j]];
+					
+					array_push(copied_elements, {tipo: "copy", data: editing_elements[j]});
+				}
+			}
+			copy_type = 0;
+		}
+		
+		if (keyboard_check(vk_control) && keyboard_check_pressed(ord("X"))) {
+			copied_elements = [];
+			array_sort(editing_elements, function(a, b) { return a-b; });
+			for (var j = 0; j < array_length(editing_elements); j++) {
+				if (editing_elements[j] < array_length(elements)) {
+					var element = elements[editing_elements[j]];
+					
+					array_push(copied_elements, {tipo: "cut", data: element});
+					array_push(prev_actions_local, {action: "remove", data: element});
+				}
+			}
+			for (var j = 0; j < array_length(prev_actions_local); j++) {
+				var action_local = prev_actions_local[j];
+				if (action_local.action == "remove") {
+					remove_charteo_element(action_local.data);
+				}
+			}
+			editing_element = -1;
+			editing_elements = [];
+			copy_type = 2;
+		}
+		
+		if (array_length(prev_actions_local) > 0) {
+			if (prev_actions_index < array_length(prev_actions)-1) {
+				var remov = array_length(prev_actions)-1-prev_actions_index;
+				for (var i = 0; i <= remov; i++) {
+					array_pop(prev_actions);
+				}
+			}
+			if (prev_actions_local[0].action == "remove") {
+				array_push(prev_actions, {action: "remove_multiple", data: prev_actions_local});
+				prev_actions_index = array_length(prev_actions)-1;
+			} else if (prev_actions_local[0].action == "change") {
+				array_push(prev_actions, {action: "change_multiple", data: prev_actions_local});
+				prev_actions_index = array_length(prev_actions)-1;
+			} else if (prev_actions_local[0].action == "move") {
+				array_push(prev_actions, {action: "move_multiple", data: prev_actions_local});
+				prev_actions_index = array_length(prev_actions)-1;
+				prev_pos_x_move_multiple = [];
+			}
+			
 		}
 		
 		if (keyboard_check_pressed(vk_escape)) { 
@@ -554,10 +778,10 @@ if (!message_shown) {
 
 
 	// Control para bajar/subir volumen
-	if (!keyboard_check(vk_control) && !keyboard_check(ord("V"))) {
+	if (!keyboard_check(vk_control) && !keyboard_check(ord("V")) && !keyboard_check(vk_alt)) {
 		if (keyboard_check_pressed(vk_subtract)) audio_set_master_gain(0, max(0, audio_get_master_gain(0)-0.2));
 		if (keyboard_check_pressed(vk_add)) audio_set_master_gain(0, min(audio_get_master_gain(0)+0.2, 2));
-	} else if (keyboard_check(vk_control) && keyboard_check(ord("V"))) {
+	} else if (keyboard_check(vk_control) && !keyboard_check(ord("V")) && keyboard_check(vk_alt)) {
 		if (keyboard_check_pressed(vk_add)) {
 			global.sound_delay += 0.05;
 			if (global.sound_delay > 10) global.sound_delay = 10;
@@ -577,32 +801,178 @@ if (!message_shown) {
 			if (global.sound_delay < -10) global.sound_delay = -10;
 		}
 	}
-	
-	// Re hacer 1
-	if (keyboard_check(vk_control) && keyboard_check_pressed(ord("Y")) && prev_type_backup != -1 && prev_pos_x_backup != -1) {
-		add_charteo_element(prev_type_backup, prev_pos_x_backup div 1);
-		editing_element = array_length(elements) - 1;
-		editing_elements = [];
-		selected_element = 0;
-	} else if (keyboard_check(vk_control) && keyboard_check_pressed(ord("Z"))) {
-		if (global.new_song_id != undefined && global.new_song_name != "") {
-			prev_type_backup = elements[array_length(elements) - 1].index_type;
-			prev_pos_x_backup = elements[array_length(elements) - 1].pos_x;
-			remove_charteo_element(elements[array_length(elements) - 1]);
-			editing_element = array_length(elements) - 1;
+	if (keyboard_check(vk_control) && keyboard_check_pressed(ord("V"))) {
+		if (array_length(copied_elements) == 1) {
+			if (copied_elements[0].tipo == "copy") {
+				add_charteo_element(elements[copied_elements[0].data].index_type, global.base_x + mouse_x);
+				if (prev_actions_index < array_length(prev_actions)-1) {
+					var remov = array_length(prev_actions)-1-prev_actions_index;
+					for (var i = 0; i <= remov; i++) {
+						array_pop(prev_actions);
+					}
+				}
+				array_push(prev_actions, {action: "add", data: {index_type: elements[copied_elements[0].data].index_type, pos_x: global.base_x + mouse_x}});
+				editing_element = array_length(elements)-1;
+				prev_actions_index = array_length(prev_actions)-1;
+			} else if (copied_elements[0].tipo == "cut") {
+				add_charteo_element(copied_elements[0].data.index_type, global.base_x + mouse_x);
+				if (prev_actions_index < array_length(prev_actions)-1) {
+					var remov = array_length(prev_actions)-1-prev_actions_index;
+					for (var i = 0; i <= remov; i++) {
+						array_pop(prev_actions);
+					}
+				}
+				array_push(prev_actions, {action: "add", data: {index_type: copied_elements[0].data.index_type, pos_x: global.base_x + mouse_x}});
+				editing_element = array_length(elements)-1;
+				prev_actions_index = array_length(prev_actions)-1;
+			}
+			copy_type = 1;
+		} else if (array_length(copied_elements) > 1) {
+			var first_pos_x = 0;
+			if (copied_elements[0].tipo == "copy") first_pos_x = elements[copied_elements[0].data].pos_x;
+			else if (copied_elements[0].tipo == "cut") first_pos_x = copied_elements[0].data.pos_x;
+			var prev_actions_local = [];
+			editing_element = -1;
 			editing_elements = [];
-			selected_element = 0;
-		} else {
-			if (array_length(elements) > array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index])) {
-				prev_type_backup = elements[array_length(elements) - 1].index_type;
-				prev_pos_x_backup = elements[array_length(elements) - 1].pos_x;
-				remove_charteo_element(elements[array_length(elements) - 1]);
-				editing_element = array_length(elements) - 1;
-				editing_elements = [];
-				selected_element = 0;
+			for (var j = 0; j < array_length(copied_elements); j++) {
+				if (copied_elements[j].tipo == "copy") {
+					var element_index = copied_elements[j].data;
+					var element = elements[element_index];
+					add_charteo_element(element.index_type, element.pos_x-first_pos_x+global.base_x + mouse_x);
+					
+					array_push(prev_actions_local, {action: "add", data: {index_type: element.index_type, pos_x: element.pos_x-first_pos_x+global.base_x + mouse_x}});
+					array_push(editing_elements, array_length(elements)-1);
+				} else if (copied_elements[j].tipo == "cut") {
+					var element = copied_elements[j].data;
+					add_charteo_element(element.index_type, element.pos_x-first_pos_x+global.base_x + mouse_x);
+					
+					array_push(prev_actions_local, {action: "add", data: {index_type: element.index_type, pos_x: element.pos_x-first_pos_x+global.base_x + mouse_x}});
+					array_push(editing_elements, array_length(elements)-1);
+				}
+			}	
+			
+			if (array_length(prev_actions_local) > 0) {
+				array_push(prev_actions, {action: "add_multiple", data: prev_actions_local});
+				prev_actions_index = array_length(prev_actions)-1;
+			}
+			copy_type = 1;
+		}
+	}
+	
+	
+	// Re hacer
+	if (keyboard_check(vk_control) && (keyboard_check_pressed(ord("Y")) || (keyboard_check(vk_shift) && keyboard_check_pressed(ord("Z")))) && prev_actions_index <= array_length(prev_actions)-1 && array_length(prev_actions) > 0) {
+		var action = prev_actions[prev_actions_index];
+		show_debug_message(string(prev_actions_index) + ":  "+json_stringify(prev_actions));
+		if (action.action == "add") {
+			// Si se añadio un element y se re hace, se añade.
+			add_charteo_element(action.data.index_type, action.data.pos_x);
+			editing_element = array_length(elements)-1;
+		} else if (action.action == "remove") {
+			// Si se quito un element y se re hace, se quita.
+			remove_charteo_element(action.data);
+			editing_element = -1;
+			editing_elements = [];
+		} else if (action.action == "change") {
+			// Si se cambio de tipo a un element y se re hace, se cambia al tipo final.
+			elements[action.data[0]].index_type = action.data[1];
+		} else if (action.action == "move") {
+			// Si se movio un element y se re hace, se devuelve a la posicion en la que termino.
+			elements[action.data[0]].pos_x = action.data[1];
+		} else if (action.action == "remove_multiple") {
+			// Si se quitaron varios element y se re hace, se borran todos.
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				if (local_action.action == "remove") {
+					remove_charteo_element(local_action.data);
+				}
+			}
+			editing_element = -1;
+			editing_elements = [];
+		} else if (action.action == "change_multiple") {
+			// Si se cambiaron varios element y se re hace, todos vuelven a su tipo cambiado.
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				elements[local_action.data[0]].index_type = local_action.data[1];
+			}
+		} else if (action.action == "move_multiple") {
+			// Si se movieron varios element y se vuelve atras, se devuelven a la posicion desde la que se comenzaron a mover.
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				if (local_action.action == "move") {
+					elements[local_action.data[0]].pos_x = local_action.data[1];
+				}
+			}
+		} else if (action.action == "add_multiple") {
+			editing_element = -1;
+			editing_elements = [];
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				if (local_action.action == "add") {
+					add_charteo_element(local_action.data.index_type, local_action.data.pos_x);
+					array_push(editing_elements, array_length(elements)-1);
+				}
 			}
 		}
+		if (prev_actions_index < array_length(prev_actions) -1) prev_actions_index++;
 		
+	} // Des hacer
+	else if (keyboard_check(vk_control) && keyboard_check_pressed(ord("Z")) && !keyboard_check(vk_shift) && prev_actions_index >= 0 && array_length(prev_actions) > 0) {
+		var action = prev_actions[prev_actions_index];
+		show_debug_message(string(prev_actions_index) + ":  "+json_stringify(prev_actions));
+		if (action.action == "add") {
+			// Si se añadio un element y se vuelve atras, se quita.
+			remove_charteo_element(action.data);
+			editing_element = -1;
+			editing_elements = [];
+		} else if (action.action == "remove") {
+			// Si se quito un element y se vuelve atras, se añade.
+			add_charteo_element(action.data.index_type, action.data.pos_x);
+			editing_element = array_length(elements)-1;
+		} else if (action.action == "change") {
+			// Si se cambio de tipo a un element y se vuelve atras, se devuelve al tipo anterior.
+			elements[action.data[0]].index_type = action.data[2];
+		} else if (action.action == "move") {
+			// Si se movio un element y se vuelve atras, se devuelve a la posicion desde la que se comenzo a mover.
+			elements[action.data[0]].pos_x = action.data[2];
+		} else if (action.action == "remove_multiple") {
+			// Si se quitaron varios element y se vuelve atras, se añaden todos.
+			editing_elements = [];
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				if (local_action.action == "remove") {
+					add_charteo_element(local_action.data.index_type, local_action.data.pos_x);
+					array_push(editing_elements, array_length(elements)-1);
+				}
+			}
+			editing_element = -1;
+		} else if (action.action == "change_multiple") {
+			// Si se cambiaron varios element y se vuelve atras, todos vuelven a su tipo original.
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				elements[local_action.data[0]].index_type = local_action.data[2];
+			}
+		} else if (action.action == "move_multiple") {
+			// Si se movieron varios element y se vuelve atras, se devuelven a la posicion desde la que se comenzaron a mover.
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				if (local_action.action == "move") {
+					elements[local_action.data[0]].pos_x = local_action.data[2];
+				}
+			}
+		} else if (action.action == "add_multiple") {
+			// Si se añadieron varios y se vuelve atras, se quitan todos
+			for (var j = 0; j < array_length(action.data); j++) {
+				var local_action = action.data[j];
+				if (local_action.action == "add") {
+					remove_charteo_element(local_action.data);
+				}
+			}
+			editing_element = -1;
+			editing_elements = [];
+		}
+		prev_actions_index--;
+		if (prev_actions_index < 0) prev_actions_index = 0;
 	}
 
 	// SELECCIONAR INPUT

@@ -39,6 +39,8 @@ function change_or_add_sfx(sfx_index) {
 				audio_destroy_stream(sound_id);
 				file_delete(file_name1);
 			} else {
+				audio_destroy_stream(sound_id);
+				file_delete(file_name1);
 				if (file_exists(working_directory + "sounds\\sfx\\"+folder+"\\clap_drum.ogg")) file_delete(working_directory + "sounds\\sfx\\"+folder+"\\clap_drum.ogg");
 				file_name1 = working_directory + "sounds\\sfx\\"+folder+"\\clap_drum.ogg"
 				file_copy(file_path, file_name1);
@@ -69,6 +71,8 @@ function change_or_add_sfx(sfx_index) {
 				audio_destroy_stream(sound_id2);
 				file_delete(file_name2);
 			} else {
+				audio_destroy_stream(sound_id2);
+				file_delete(file_name2);
 				if (file_exists(working_directory + "sounds\\sfx\\"+folder+"\\snare_drum.ogg")) file_delete(working_directory + "sounds\\sfx\\"+folder+"\\snare_drum.ogg");
 				file_name2 = working_directory + "sounds\\sfx\\"+folder+"\\snare_drum.ogg"
 				file_copy(file_path2, file_name2);
@@ -99,7 +103,9 @@ function change_or_add_sfx(sfx_index) {
 				audio_destroy_stream(sound_id3);
 				file_delete(file_name3);
 			} else {
-				if (file_exists(working_directory + "sounds\\sfx\\"+folder+"\\tambourine.ogg")) file_delete(working_directory + "sounds\\sfx\\"+folder+"\\v.ogg");
+				audio_destroy_stream(sound_id3);
+				file_delete(file_name3);
+				if (file_exists(working_directory + "sounds\\sfx\\"+folder+"\\tambourine.ogg")) file_delete(working_directory + "sounds\\sfx\\"+folder+"\\tambourine.ogg");
 				file_name3 = working_directory + "sounds\\sfx\\"+folder+"\\tambourine.ogg"
 				file_copy(file_path3, file_name3);
 				sound_id2 = audio_create_stream(file_name3);

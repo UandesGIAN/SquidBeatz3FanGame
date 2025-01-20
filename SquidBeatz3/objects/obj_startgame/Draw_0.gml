@@ -11,8 +11,6 @@ draw_sprite(spr_logo, 0, 256, 128);
 
 shader_reset();
 
-show_debug_message(string(current_load) + "  " + string(gradual_load));
-
 draw_set_halign(fa_right);
 
 if (current_load == 0) {

@@ -10,8 +10,8 @@ if (global.current_language  == "ENGLISH") draw_text(1024, 300, "Selected: ");
 else draw_text(1024, 300, "Seleccion: ");
 var sprite_position_y = (selected_type < 4) ? 320 : 290;
 draw_set_color(global.primary_color_yellow);
-if (global.current_language  == "ENGLISH") draw_text(1023 + string_width("Selected:")/2-7, 345, string(selected_type));
-else draw_text(1023 + string_width("Seleccion:")/2-7, 345, string(selected_type));
+if (global.current_language  == "ENGLISH") draw_text(1023 + string_width("Selected:")/2-7, 345, string(selected_type+1));
+else draw_text(1023 + string_width("Seleccion:")/2-7, 345, string(selected_type+1));
 
 draw_set_color(c_white);
 shader_set(shader_hue_shift);
@@ -63,12 +63,12 @@ if (global.current_language  == "ENGLISH") draw_text(room_width-20, 440, "Curren
 else draw_text(room_width-20, 440, "Coordenada actual: " + string((global.base_x + mouse_x) div 1));
 draw_set_halign(fa_left);
 
-if ((!keyboard_check(ord("V")) && !keyboard_check(vk_control) && (keyboard_check(vk_subtract) || keyboard_check(vk_add)))) volume_message_timer = current_time + 1000;
-else if ((keyboard_check(ord("V")) && keyboard_check(vk_control) && (keyboard_check(vk_subtract) || keyboard_check(vk_add)))) volume_message_timer = current_time + 1000;
+if ((!keyboard_check(vk_alt) && !keyboard_check(vk_control) && (keyboard_check(vk_subtract) || keyboard_check(vk_add)))) volume_message_timer = current_time + 1000;
+else if ((keyboard_check(vk_alt) && keyboard_check(vk_control) && (keyboard_check(vk_subtract) || keyboard_check(vk_add)))) volume_message_timer = current_time + 1000;
 
 // Si ha pasado menos de 1 segundo, muestra el volumen actual
 if (volume_message_timer > current_time) {
-	if (keyboard_check(ord("V")) && keyboard_check(vk_control)) {
+	if (keyboard_check(vk_alt) && keyboard_check(vk_control)) {
 		var padding = 10; // Espaciado interno del rectángulo
 		var volume_text = "DELAY: " + string(global.sound_delay);
 	    var text_width = string_width(volume_text);
@@ -83,6 +83,55 @@ if (volume_message_timer > current_time) {
 		var volume_text = "VOLUMEN: " + string(audio_get_master_gain(0));
 		if (global.current_language  == "ENGLISH") volume_text = "VOLUME: " + string(audio_get_master_gain(0));
 	    var text_width = string_width(volume_text);
+
+		// Dibujar volumen
+	    draw_set_color(c_black);
+	    draw_rectangle(800 - padding, 380 - padding, 800 + text_width + padding, 380 + 30 + padding, false);
+	    draw_set_color(c_white);
+	    draw_text(800, 365, volume_text);
+	}
+}
+
+if (keyboard_check(vk_control) && (keyboard_check_pressed(ord("C")) || keyboard_check_pressed(ord("V")) || keyboard_check_pressed(ord("X")))) copy_message = current_time + 1000;
+
+// Si ha pasado menos de 1 segundo, muestra el volumen actual
+if (copy_message > current_time) {
+	if (copy_type == 0) {
+		var padding = 10; // Espaciado interno del rectángulo
+		var volume_text = "COPIED";
+		var text_width = string_width(volume_text);
+		if (global.current_language == "CASTELLANO") {
+			volume_text = "COPIADO";
+			text_width = string_width(volume_text);
+		}
+		
+		// Dibujar volumen
+	    draw_set_color(c_black);
+	    draw_rectangle(800 - padding, 380 - padding, 800 + text_width + padding, 380 + 30 + padding, false);
+	    draw_set_color(c_white);
+	    draw_text(800, 365, volume_text);
+	} else if (copy_type == 1) {
+		var padding = 10; // Espaciado interno del rectángulo
+		var volume_text = "PASTED";
+		var text_width = string_width(volume_text);
+		if (global.current_language == "CASTELLANO") {
+			volume_text = "PEGADO";
+			text_width = string_width(volume_text);
+		}
+
+		// Dibujar volumen
+	    draw_set_color(c_black);
+	    draw_rectangle(800 - padding, 380 - padding, 800 + text_width + padding, 380 + 30 + padding, false);
+	    draw_set_color(c_white);
+	    draw_text(800, 365, volume_text);
+	} else if (copy_type == 2) {
+		var padding = 10; // Espaciado interno del rectángulo
+		var volume_text = "CUTED";
+		var text_width = string_width(volume_text);
+		if (global.current_language == "CASTELLANO") {
+			volume_text = "CORTADO";
+			text_width = string_width(volume_text);
+		}
 
 		// Dibujar volumen
 	    draw_set_color(c_black);

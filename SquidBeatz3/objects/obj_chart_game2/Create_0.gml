@@ -9,6 +9,14 @@ selected_element = 0;
 editing_element = -1;
 editing_elements = [];
 
+prev_actions = [];
+prev_actions_index = 0;
+prev_pos_x_move_multiple = [];
+prev_pos_x_move = 0;
+copied_elements = [];
+copy_message = current_time;
+copy_type = 0; // copy: 0, paste: 1, cut: 2
+
 current_key_timer = current_time;
 advanced_controls_enabled = 0;
 sync_ed = 0;
