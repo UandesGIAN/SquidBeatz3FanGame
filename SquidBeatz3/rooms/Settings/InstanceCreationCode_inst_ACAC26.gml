@@ -18,8 +18,7 @@ action = function() {
 				
 				if (string_length(file_path) > 0) {
 					if (string_pos(".ini", file_path)) {
-						
-						
+						obj_handle_savedata.message_shown = 1;
 					} else {
 						show_message(global.current_language == "ENGLISH" ? "The selected file is invalid. Please select a file with the .ini extension." : "El archivo seleccionado no es válido. Por favor, selecciona un archivo con la extensión .ini.");
 					}
