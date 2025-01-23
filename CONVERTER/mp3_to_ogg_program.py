@@ -190,6 +190,7 @@ mid_freq = 2000
 very_strong_intensity = 0.7
 strong_intensity = 0.5
 weak_intensity = 0.3
+min_val = 0.3
 
 # Inicialización de las notas por categoría
 notes = {
@@ -220,7 +221,7 @@ from tkinter import messagebox
 
 def customize_auto_chart():
     """Abre un menú para personalizar las variables del auto chart."""
-    global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity
+    global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val
     global notes, note_texts
    
      # Crear una nueva ventana
@@ -274,14 +275,18 @@ def customize_auto_chart():
     mid_entry.pack(pady=5, anchor="w")
 
     # Muy fuerte intensidad
-    very_strong_entry, validate_very_strong = create_input_field("Very Strong Intensity", very_strong_intensity, 0, 1, "float")
+    very_strong_entry, validate_very_strong = create_input_field("Very Strong Intensity (min-1)", very_strong_intensity, min_val, 1, "float")
     very_strong_entry.pack(pady=5, anchor="w")
     # Fuerte intensidad
-    strong_entry, validate_strong = create_input_field("Strong Intensity", strong_intensity, 0, 1, "float")
+    strong_entry, validate_strong = create_input_field("Strong Intensity (min-1)", strong_intensity, min_val, 1, "float")
     strong_entry.pack(pady=5, anchor="w")
     # Débil intensidad
-    weak_entry, validate_weak = create_input_field("Weak Intensity", weak_intensity, 0, 1, "float")
+    weak_entry, validate_weak = create_input_field("Weak Intensity (min-1)", weak_intensity, min_val, 1, "float")
     weak_entry.pack(pady=5, anchor="w")
+    # Menor intensidad
+    min_entry, validate_min = create_input_field("Minimum Intensity (0-weak)", weak_intensity, 0, weak_intensity, "float")
+    min_entry.pack(pady=5, anchor="w")
+
 
     # Crear dropdowns para todas las categorías de notas
     note_options = list(note_texts.keys())  # Usamos los números para los OptionMenu
@@ -306,7 +311,7 @@ def customize_auto_chart():
 
     # Función para guardar configuración
     def save_configuration():
-        global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity
+        global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val
         global notes, note_texts
 
         valid_low = validate_low()
@@ -314,13 +319,15 @@ def customize_auto_chart():
         valid_very_strong = validate_very_strong()
         valid_strong = validate_strong()
         valid_weak = validate_weak()
+        valid_min = validate_min()
 
-        if None not in [valid_low, valid_mid, valid_very_strong, valid_strong, valid_weak]:
+        if None not in [valid_low, valid_mid, valid_very_strong, valid_strong, valid_weak, valid_min]:
             low_freq = valid_low
             mid_freq = valid_mid
             very_strong_intensity = valid_very_strong
             strong_intensity = valid_strong
             weak_intensity = valid_weak
+            min_val = valid_weak
 
             # Actualizar las notas seleccionadas en las categorías
             for label in note_labels:
@@ -350,7 +357,7 @@ def customize_auto_chart():
     canvas.config(scrollregion=canvas.bbox("all"))
 
 
-def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak):
+def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak, min_vol):
     y, sr = librosa.load(audio_path, sr=None)
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, units="time")
     rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
@@ -394,21 +401,10 @@ def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak):
                 index_type = notes["Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)"]-1
 
         pos_x = round((beat * (bpm * 132 / 60)), 1)
-        if avg_rms > weak:
+        if avg_rms > min_val:
             chart.append({"pos_x": pos_x, "index_type": index_type})
 
     return chart
-
-def remove_duplicate_events(chart):
-    # Filtrar eventos que están demasiado cerca unos de otros (menos de 0.1 segundos)
-    threshold = 0.1  # Ajustar según necesidad
-    filtered_chart = []
-    
-    for event in chart:
-        if len(filtered_chart) == 0 or abs(filtered_chart[-1]['pos_x'] - event['pos_x']) > threshold:
-            filtered_chart.append(event)
-    
-    return filtered_chart
 
 # Export files
 def create_unique_folder(base_name, parent_dir):
@@ -491,8 +487,8 @@ def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, outpu
             # Generar BPM y Chart JSON
             bpm_found = calculate_bpm(file_path)
             start_found = calculate_sync_tempo(bpm_found) if bpm_found else None
-            global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity
-            easy_chart = generate_chart(file_path, bpm_found, low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity)
+            global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val
+            easy_chart = generate_chart(file_path, bpm_found, low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val)
             progress_text.insert(tk.END, f"Generated chart and BPM data for {base_name}\n")
             progress_text.update()
 

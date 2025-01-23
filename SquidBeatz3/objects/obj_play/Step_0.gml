@@ -227,6 +227,7 @@ if (keyboard_check(vk_control) && keyboard_check_pressed(ord("O")) && !global.is
 				global.start_point = 272;
 				global.is_playing = 0;
 				play_music = 0;
+				obj_handle_savedata.save_ini_data();
 			}
         } else {
             show_message(global.current_language == "ENGLISH" ? "The selected file is not valid. Please select a compatible .zip file." : "El archivo seleccionado no es válido. Por favor, selecciona un archivo .zip compatible.");
@@ -252,6 +253,7 @@ if (keyboard_check(vk_control) && keyboard_check(vk_alt) && keyboard_check_press
     start_song_i = -1;
     end_song_i = -1;
     global.delete_async_id = get_string_async(global.current_language == "ENGLISH" ? "Enter the number of the song from which to delete.\nMust be a number between 1 and " + string(array_length(global.song_list) - 1) + "." : "Ingrese el número de la canción desde la cual se borrará.\nDebe ser un número entre 1 y " + string(array_length(global.song_list) - 1) + ".", "");
+	obj_handle_savedata.save_ini_data();
 }
 
 
@@ -260,7 +262,8 @@ if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !global.is_gamepad 
     show_message(global.current_language == "ENGLISH" ? "DELETE SONG\n\nWarning! Deleting a song is IRREVERSIBLE. If you want to save a copy of this song, you should export it using Ctrl+E." : "ELIMINAR CANCIÓN\n\n¡Advertencia! Eliminar una canción es una acción IRREVERSIBLE, si quieres guardar una copia de esta canción, debes exportar las canciones que deseas con ctrl+E.");
     if (1 == show_question(global.current_language == "ENGLISH" ? "Are you sure you want to continue?\n\nDeleting this song will remove its files, progress, and chart data. Remember, you can make a backup in ZIP format with Ctrl+E and then load it with Ctrl+O." : "Seguro que quieres continuar?\n\nEliminar esta canción borrará sus archivos, datos de progreso y datos de charteo. Recuerda que puedes hacer una copia en formato ZIP con ctrl+E y el índice de la canción, y luego cargarlo con ctrl+O.")) {
         handle_delete_files(global.current_song_index, global.current_song_index);
-    }
+		obj_handle_savedata.save_ini_data();
+	}
 }
 if (keyboard_check(vk_control) && !keyboard_check(vk_alt) && !global.is_gamepad && keyboard_check_pressed(ord("S")) && !play_music && check_permissions() && !global.practice_mode) {
     show_message(global.current_language == "ENGLISH" ? "SAVE PROGRESS DATA\n\nYou will now be prompted to save a file containing information about each song, your score, and any changes you’ve made to the settings. To load this file, you must do so from the settings menu using the mouse and keyboard.\nIf you wish to back up your data and game files, you must export the songs first and then load the save file. This is because, for the data to load, the song names at the save file and at the game files are compared, if they match, the data is loaded; else, it is not.\n\n" : "GUARDAR DATOS DE PROGRESO\n\nA continuación se te pedirá que guardes un archivo de guardado con información de cada canción, tu puntaje y los cambios que hayas realizado en los ajustes. Para cargar este archivo debes hacerlo desde los ajustes y usando el mouse y teclado.\nSi deseas guardar una copia de seguridad de tus datos y los archivos del juego, debes exportar las canciones primero, luego cargar el archivo de guardado, pues para que se carguen los datos, se comparan los nombres de canciones en el archivo de guardado y en los archivos del juego, si coinciden, se cargan los datos, si no, no.");
