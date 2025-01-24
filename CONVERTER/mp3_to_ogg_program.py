@@ -16,6 +16,7 @@ from scipy.fft import fft
 from tkinter import Tk, filedialog, messagebox
 import librosa.display
 import re
+import subprocess
 
 def update_progress(message):
     progress_text.config(state=tk.NORMAL)
@@ -219,9 +220,6 @@ note_texts = {
         8: "LR double - ABXY double (8)"
     }
 
-import tkinter as tk
-from tkinter import messagebox
-
 def customize_auto_chart():
     """Abre un menú para personalizar las variables del auto chart."""
     global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val
@@ -406,7 +404,7 @@ def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak, min_val
                 index_type = notes["Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)"]-1
 
         pos_x = round((beat * (bpm * 132 / 60)), 2)
-        if avg_rms > min_val+0.1 and (pos_x - last_pos_x > 132) and index_type != None:
+        if avg_rms > min_val+0.05 and (pos_x - last_pos_x > 130) and index_type != None:
             chart.append({"pos_x": pos_x, "index_type": index_type})
             last_pos_x = pos_x
 
@@ -799,6 +797,7 @@ def select_file():
     messagebox.showinfo("File Selection", "Please select an MP3 file to generate frequency and intensity graphs.")
     file_path = filedialog.askopenfilename(filetypes=[("MP3 files", "*.mp3")])
     if file_path:
+        update_progress("Extracting data from audio.")
         process_audio(file_path)
     else:
         messagebox.showwarning("No File Selected", "No file selected.")
@@ -867,6 +866,16 @@ def process_audio(file_path):
 
     plt.tight_layout()
     plt.show()
+    
+    # Save the plot as a PNG in the same directory as the MP3 file
+    output_dir = os.path.dirname(file_path)
+    output_path = os.path.join(output_dir, "graphs_helper.png")
+    plt.savefig(output_path)
+    plt.close()
+
+    # Open the directory in the file explorer and highlight the image
+    messagebox.showinfo("File Saved", f"Graph saved at {output_path}")
+    os.startfile(output_path)
 
     
 

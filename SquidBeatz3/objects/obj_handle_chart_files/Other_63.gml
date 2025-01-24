@@ -52,7 +52,7 @@ if (async_load[? "id"] == global.async_id) {
 		                            break;
 		                        }
 		                    }
-							var updated_json_content = json_stringify(song_names_array);
+							var updated_json_content = json_stringify({"song_names": song_names_array});
 
 						    // Write the updated JSON back to the file
 						    var write_file = file_text_open_write(dir_path + "song_titles.json");
