@@ -11,7 +11,10 @@ import pywt
 import librosa
 from scipy import signal
 import shutil
-
+import matplotlib.pyplot as plt
+from scipy.fft import fft
+from tkinter import Tk, filedialog, messagebox
+import librosa.display
 import re
 
 def update_progress(message):
@@ -185,25 +188,25 @@ def process_audio_to_matrix(file_path, output_json):
 
 
 # Valores iniciales para las variables configurables
-low_freq = 200
-mid_freq = 2000
-very_strong_intensity = 0.7
-strong_intensity = 0.5
+low_freq = 300
+mid_freq = 1000
+very_strong_intensity = 0.8
+strong_intensity = 0.6
 weak_intensity = 0.3
-min_val = 0.3
+min_val = 0.15
 
 # Inicialización de las notas por categoría
 notes = {
     "Very high volume (> Very strong)": 8,
     "High frequency - High volume (> Mid frequency, > Strong Intensity)": 7,
-    "High frequency - Mid volume (> Mid frequency, > Weak Intensity)": 2,
+    "High frequency - Mid volume (> Mid frequency, > Weak Intensity)": 1,
     "High frequency - Low volume (> Mid frequency, < Weak Intensity)": 3,
     "Mid frequency - High volume (< Mid frequency and > Low frequency, > Strong Intensity)": 5,
-    "Mid frequency - Mid volume (< Mid frequency and > Low frequency, > Weak Intensity)": 4,
-    "Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)": 1,
+    "Mid frequency - Mid volume (< Mid frequency and > Low frequency, > Weak Intensity)": 3,
+    "Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)": 2,
     "Low frequency - High volume (< Low frequency, > Strong Intensity)": 6,
     "Low frequency - Mid volume (< Low frequency, > Weak Intensity)": 2,
-    "Low frequency - Low volume (< Low frequency, < Weak Intensity)": 1
+    "Low frequency - Low volume (< Low frequency, < Weak Intensity)": 4
 }
 note_texts = {
         1: "LR simple (1)",
@@ -327,7 +330,7 @@ def customize_auto_chart():
             very_strong_intensity = valid_very_strong
             strong_intensity = valid_strong
             weak_intensity = valid_weak
-            min_val = valid_weak
+            min_val = valid_min
 
             # Actualizar las notas seleccionadas en las categorías
             for label in note_labels:
@@ -357,7 +360,7 @@ def customize_auto_chart():
     canvas.config(scrollregion=canvas.bbox("all"))
 
 
-def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak, min_vol):
+def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak, min_val):
     y, sr = librosa.load(audio_path, sr=None)
     tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, units="time")
     rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
@@ -366,15 +369,17 @@ def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak, min_vol
     times = librosa.times_like(stft[0], sr=sr)
     rms_max = np.max(rms)
     normalized_rms = rms / rms_max if rms_max > 0 else rms
+    
     chart = []
-
+    last_pos_x = -np.inf
     for i, beat in enumerate(beat_frames):
         closest_idx = np.argmin(np.abs(times - beat))
         low_energy = np.sum(stft[freqs < low, closest_idx])
         mid_energy = np.sum(stft[(freqs >= low) & (freqs < mid), closest_idx])
         high_energy = np.sum(stft[freqs >= mid, closest_idx])
         avg_rms = normalized_rms[closest_idx] if closest_idx < len(normalized_rms) else 0
-
+        index_type = None
+        
         # Evaluación de la intensidad y la frecuencia
         if avg_rms > very_strong:
             index_type = notes["Very high volume (> Very strong)"]-1  # Usar el valor entero
@@ -400,11 +405,137 @@ def generate_chart(audio_path, bpm, low, mid, very_strong, strong, weak, min_vol
             else:
                 index_type = notes["Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)"]-1
 
-        pos_x = round((beat * (bpm * 132 / 60)), 1)
-        if avg_rms > min_val:
+        pos_x = round((beat * (bpm * 132 / 60)), 2)
+        if avg_rms > min_val+0.1 and (pos_x - last_pos_x > 132) and index_type != None:
+            chart.append({"pos_x": pos_x, "index_type": index_type})
+            last_pos_x = pos_x
+
+    return chart
+
+def generate_chart_3(audio_path, bpm, low, mid, very_strong, strong, weak, min_val):
+    # Cargar el audio
+    y, sr = librosa.load(audio_path, sr=None)
+
+    # Calcular características relevantes
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+    stft = np.abs(librosa.stft(y))
+    freqs = librosa.fft_frequencies(sr=sr)
+    times = librosa.times_like(stft[0], sr=sr)
+
+    # Normalizar RMS
+    rms_max = np.max(rms)
+    normalized_rms = rms / rms_max if rms_max > 0 else rms
+
+    # Inicializar variables
+    chart = []
+    last_pos_x = -np.inf  # Última posición registrada en el gráfico
+
+    # Procesar cada instante de tiempo
+    for i, time in enumerate(times):
+        # Calcular la energía en diferentes rangos de frecuencia
+        low_energy = np.sum(stft[freqs < low, i])
+        mid_energy = np.sum(stft[(freqs >= low) & (freqs < mid), i])
+        high_energy = np.sum(stft[freqs >= mid, i])
+        index_type = None
+        
+        # RMS promedio en este instante
+        avg_rms = (normalized_rms[i] if i < len(normalized_rms) else 0 ) - 0.055
+
+        # Determinar el tipo de nota usando el diccionario `notes`
+        if avg_rms > very_strong:
+            index_type = notes["Very high volume (> Very strong)"] - 1
+        elif high_energy > low_energy and high_energy > mid_energy:
+            if avg_rms > strong:
+                index_type = notes["High frequency - High volume (> Mid frequency, > Strong Intensity)"] - 1
+            elif avg_rms > weak:
+                index_type = notes["High frequency - Mid volume (> Mid frequency, > Weak Intensity)"] - 1
+            else:
+                index_type = notes["High frequency - Low volume (> Mid frequency, < Weak Intensity)"] - 1
+        elif low_energy > high_energy and low_energy > mid_energy:
+            if avg_rms > strong:
+                index_type = notes["Low frequency - High volume (< Low frequency, > Strong Intensity)"] - 1
+            elif avg_rms > weak:
+                index_type = notes["Low frequency - Mid volume (< Low frequency, > Weak Intensity)"] - 1
+            else:
+                index_type = notes["Low frequency - Low volume (< Low frequency, < Weak Intensity)"] - 1
+        elif mid_energy > high_energy and mid_energy > low_energy:
+            if avg_rms > strong:
+                index_type = notes["Mid frequency - High volume (< Mid frequency and > Low frequency, > Strong Intensity)"] - 1
+            elif avg_rms > weak:
+                index_type = notes["Mid frequency - Mid volume (< Mid frequency and > Low frequency, > Weak Intensity)"] - 1
+            else:
+                index_type = notes["Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)"] - 1
+
+        # Calcular la posición x
+        pos_x = round((time * (bpm * 132 / 60)), 2)
+
+        # Aplicar las condiciones de filtrado
+        if avg_rms > min_val and (pos_x - last_pos_x > 60) and index_type != None:
+            chart.append({"pos_x": pos_x, "index_type": index_type})
+            last_pos_x = pos_x
+
+    return chart
+
+def generate_chart_2(audio_path, bpm, low, mid, very_strong, strong, weak, min_val):
+    # Cargar el audio
+    y, sr = librosa.load(audio_path, sr=None)
+    
+    # Detectar beats
+    tempo, beat_frames = librosa.beat.beat_track(y=y, sr=sr, units="time")
+
+    # Calcular características relevantes
+    stft = np.abs(librosa.stft(y))
+    freqs = librosa.fft_frequencies(sr=sr)
+    times = librosa.times_like(stft[0], sr=sr)
+
+    # Centroide espectral (indicador de tono y brillo)
+    spectral_centroid = librosa.feature.spectral_centroid(S=stft, sr=sr)[0]
+    spectral_centroid_max = np.max(spectral_centroid)
+    normalized_centroid = spectral_centroid / spectral_centroid_max if spectral_centroid_max > 0 else spectral_centroid
+
+    # RMS para medir la intensidad
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+    rms_max = np.max(rms)
+    normalized_rms = rms / rms_max if rms_max > 0 else rms
+
+    chart = []
+
+    for i, beat in enumerate(beat_frames):
+        closest_idx = np.argmin(np.abs(times - beat))
+        index_type = None
+        # Valores relacionados con tono y melodía en el beat actual
+        avg_centroid = normalized_centroid[closest_idx] if closest_idx < len(normalized_centroid) else 0
+        avg_rms = normalized_rms[closest_idx] if closest_idx < len(normalized_rms) else 0
+
+        # Evaluación de la intensidad tonal y melódica
+        if avg_rms > very_strong:
+            index_type = notes["Very high volume (> Very strong)"] - 1
+        elif avg_centroid > mid and avg_rms > strong:
+            index_type = notes["High frequency - High volume (> Mid frequency, > Strong Intensity)"] - 1
+        elif avg_centroid > mid and avg_rms > weak:
+            index_type = notes["High frequency - Mid volume (> Mid frequency, > Weak Intensity)"] - 1
+        elif avg_centroid > mid:
+            index_type = notes["High frequency - Low volume (> Mid frequency, < Weak Intensity)"] - 1
+        elif avg_centroid > low and avg_rms > strong:
+            index_type = notes["Mid frequency - High volume (< Mid frequency and > Low frequency, > Strong Intensity)"] - 1
+        elif avg_centroid > low and avg_rms > weak:
+            index_type = notes["Mid frequency - Mid volume (< Mid frequency and > Low frequency, > Weak Intensity)"] - 1
+        elif avg_centroid > low:
+            index_type = notes["Mid frequency - Low volume (< Mid frequency and > Low frequency, < Weak Intensity)"] - 1
+        elif avg_rms > strong:
+            index_type = notes["Low frequency - High volume (< Low frequency, > Strong Intensity)"] - 1
+        elif avg_rms > weak:
+            index_type = notes["Low frequency - Mid volume (< Low frequency, > Weak Intensity)"] - 1
+        else:
+            index_type = notes["Low frequency - Low volume (< Low frequency, < Weak Intensity)"] - 1
+
+        # Posición en el gráfico
+        pos_x = round((beat * (bpm * 132 / 60)), 2)
+        if avg_rms > min_val and index_type != None:
             chart.append({"pos_x": pos_x, "index_type": index_type})
 
     return chart
+
 
 # Export files
 def create_unique_folder(base_name, parent_dir):
@@ -451,7 +582,7 @@ def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, outpu
         if file_path.endswith('.mp3'):
             base_name = os.path.splitext(os.path.basename(file_path))[0]
             progress_text.insert(tk.END, f"Processing file {index}/{len(files)}: {base_name}\n")
-            progress_text.update()
+            progress_text.update_idletasks()
 
             # Crear una carpeta individual para la canción dentro de output_converted_songs
             MAX_FILENAME_LENGTH = 100
@@ -489,9 +620,11 @@ def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, outpu
             start_found = calculate_sync_tempo(bpm_found) if bpm_found else None
             global low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val
             easy_chart = generate_chart(file_path, bpm_found, low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val)
+            normal_chart = generate_chart_2(file_path, bpm_found, low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val)
+            hard_chart = generate_chart_3(file_path, bpm_found, low_freq, mid_freq, very_strong_intensity, strong_intensity, weak_intensity, min_val)
             progress_text.insert(tk.END, f"Generated chart and BPM data for {base_name}\n")
             progress_text.update()
-
+            
             chart_data = {
                 "easy": {
                     "chart": easy_chart,
@@ -499,12 +632,12 @@ def convert_mp3_to_ogg(files, output_folder, name_file_path, chart_folder, outpu
                     "start_point": 272
                 },
                 "normal": {
-                    "chart": [],
+                    "chart": normal_chart,
                     "tempo": bpm_found,
                     "start_point": 272
                 },
                 "hard": {
-                    "chart": [],
+                    "chart": hard_chart,
                     "tempo": bpm_found,
                     "start_point": 272
                 }
@@ -659,10 +792,88 @@ def show_instructions():
     messagebox.showinfo("How to Use", instructions)
 
 
+def select_file():
+    """Open a file dialog to select an audio file."""
+    root = Tk()
+    root.withdraw()
+    messagebox.showinfo("File Selection", "Please select an MP3 file to generate frequency and intensity graphs.")
+    file_path = filedialog.askopenfilename(filetypes=[("MP3 files", "*.mp3")])
+    if file_path:
+        process_audio(file_path)
+    else:
+        messagebox.showwarning("No File Selected", "No file selected.")
+    
+
+def process_audio(file_path):
+    """Process the audio file and generate frequency, intensity, and spectral centroid graphs."""
+    # Load the audio file with pydub and convert to mono
+    audio = AudioSegment.from_file(file_path)
+    sample_rate = audio.frame_rate
+    samples = np.array(audio.get_array_of_samples())
+    if audio.channels > 1:
+        samples = samples[::audio.channels]  # Take only one channel if the audio is stereo
+
+    # Convert to a format compatible with librosa
+    y = samples.astype(float) / np.max(np.abs(samples))  # Normalize the samples
+    sr = sample_rate
+
+    # Calculate features with librosa
+    stft = np.abs(librosa.stft(y, n_fft=2048, hop_length=512))
+    times = librosa.times_like(stft[0], sr=sr)
+    freqs = librosa.fft_frequencies(sr=sr)
+
+    # Average frequency (peak)
+    avg_frequencies = np.argmax(stft, axis=0) * (sr / 2) / (stft.shape[0] - 1)
+
+    # Intensity (RMS)
+    rms = librosa.feature.rms(y=y, frame_length=2048, hop_length=512)[0]
+
+    # Normalize RMS by the maximum RMS of the entire song
+    max_rms = np.max(rms)
+    rms_normalized = rms / max_rms  # Normalize RMS to the max value
+
+    # Spectral centroid
+    spectral_centroid = librosa.feature.spectral_centroid(S=stft, sr=sr)[0]
+
+    # Generate plots
+    plt.figure(figsize=(12, 10))
+
+    # Average frequency
+    plt.subplot(3, 1, 1)
+    plt.plot(times, avg_frequencies, label="Average Frequency")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Frequency (Hz)")
+    plt.title("Average Frequency vs Time")
+    plt.legend()
+    plt.grid()
+
+    # Intensity (RMS)
+    plt.subplot(3, 1, 2)
+    plt.plot(times, rms_normalized, label="Intensity (RMS)", color="orange")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Intensity (RMS)")
+    plt.title("Intensity (RMS) vs Time")
+    plt.legend()
+    plt.grid()
+
+    # Spectral centroid
+    plt.subplot(3, 1, 3)
+    plt.plot(times, spectral_centroid, label="Spectral Centroid", color="green")
+    plt.xlabel("Time (s)")
+    plt.ylabel("Frequency (Hz)")
+    plt.title("Frequency vs Time (Normal Difficulty)")
+    plt.legend()
+    plt.grid()
+
+    plt.tight_layout()
+    plt.show()
+
+    
+
 # Create main application window
 root = tk.Tk()
 root.title("MP3 to SquidBeatz3 Format Converter")
-root.geometry("500x400")
+root.geometry("500x440")
 root.configure(bg="#333333")
 
 # Load custom font (Splatoon2)
@@ -715,6 +926,16 @@ customize_chart_button = tk.Button(
 )
 customize_chart_button.pack(pady=10)
 
+generator_button = tk.Button(
+    root,
+    text="FREQ AND INTENSITY HELPER",
+    command=select_file,
+    bg="#555555",
+    fg="white",
+    font=button_font
+)
+generator_button.pack(pady=10)
+
 exit_button = tk.Button(
     root,
     text="EXIT",
@@ -727,7 +948,7 @@ exit_button.pack(pady=10)
 
 # Progreso en la esquina inferior izquierda
 progress_text = tk.Text(root, height=5, bg="#222222", fg="white", wrap=tk.WORD)
-progress_text.place(x=10, y=300, width=480, height=80)
+progress_text.place(x=10, y=350, width=480, height=80)
 progress_text.insert(tk.END, "Ready to process files...\n")
 progress_text.config(state=tk.DISABLED)
 
