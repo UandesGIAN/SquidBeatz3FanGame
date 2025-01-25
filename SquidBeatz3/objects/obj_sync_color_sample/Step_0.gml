@@ -10,17 +10,17 @@ if (array_length(botones) > 0) {
 	    if (((keyboard_check_pressed(vk_up) || keyboard_check_pressed(vk_left)) && !global.is_gamepad) || (global.is_gamepad &&
 			(gamepad_button_check_pressed(global.current_gamepad, gp_padu) || gamepad_button_check_pressed(global.current_gamepad, gp_padl)) ||
 			(!stick_moved && (gamepad_axis_value(global.current_gamepad, gp_axislh) < -0.5 || gamepad_axis_value(global.current_gamepad, gp_axislv) < -0.5)))) {
-			if ((indice_actual == 5 || indice_actual == 6) && (keyboard_check_pressed(vk_left) || (
+			if ((indice_actual == 6 || indice_actual == 7) && (keyboard_check_pressed(vk_left) || (
 				gamepad_button_check_pressed(global.current_gamepad, gp_padl) || (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislh) < -0.5) ))) {
 				botones[indice_actual].seleccionado = false; // Deselecciona el actual
 		        indice_actual = (indice_actual - 2 + array_length(botones)) mod array_length(botones); // Mover al anterior
 		        botones[indice_actual].seleccionado = true; // Selecciona el nuevo
-			} else if ((indice_actual == 7) && (keyboard_check_pressed(vk_left) || (
+			} else if ((indice_actual == 8) && (keyboard_check_pressed(vk_left) || (
 				gamepad_button_check_pressed(global.current_gamepad, gp_padl) || (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislh) < -0.5) ))) {
 				botones[indice_actual].seleccionado = false; // Deselecciona el actual
 		        indice_actual = (indice_actual - 5 + array_length(botones)) mod array_length(botones); // Mover al anterior
 		        botones[indice_actual].seleccionado = true; // Selecciona el nuevo
-			} else if ((indice_actual == 8 || indice_actual == 9) && (keyboard_check_pressed(vk_left) || (
+			} else if ((indice_actual == 9 || indice_actual == 10) && (keyboard_check_pressed(vk_left) || (
 				gamepad_button_check_pressed(global.current_gamepad, gp_padl) || (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislh) < -0.5) ))) {
 				botones[indice_actual].seleccionado = false; // Deselecciona el actual
 		        indice_actual = (indice_actual - 3 + array_length(botones)) mod array_length(botones); // Mover al anterior
@@ -35,17 +35,17 @@ if (array_length(botones) > 0) {
 	    if (((keyboard_check_pressed(vk_down) || keyboard_check_pressed(vk_right)) && !global.is_gamepad) || (global.is_gamepad &&
 			(gamepad_button_check_pressed(global.current_gamepad, gp_padd) || gamepad_button_check_pressed(global.current_gamepad, gp_padr)) ||
 			(!stick_moved && (gamepad_axis_value(global.current_gamepad, gp_axislh) > 0.5 || gamepad_axis_value(global.current_gamepad, gp_axislv) > 0.5)))) {
-	        if ((indice_actual == 2) && (keyboard_check_pressed(vk_right) || (
+	        if ((indice_actual == 3) && (keyboard_check_pressed(vk_right) || (
 				gamepad_button_check_pressed(global.current_gamepad, gp_padr) || (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislh) > 0.5) ))) {
 				botones[indice_actual].seleccionado = false; // Deselecciona el actual
-		        indice_actual = (indice_actual + 5) mod array_length(botones); // Mover al siguiente
+		        indice_actual = (indice_actual + 6) mod array_length(botones); // Mover al siguiente
 		        botones[indice_actual].seleccionado = true; // Selecciona el nuevo
-			} else if ((indice_actual == 3 || indice_actual == 4) && (keyboard_check_pressed(vk_right) || (
+			} else if ((indice_actual == 0 || indice_actual == 4 || indice_actual == 5) && (keyboard_check_pressed(vk_right) || (
 				gamepad_button_check_pressed(global.current_gamepad, gp_padr) || (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislh) > 0.5) ))) {
 				botones[indice_actual].seleccionado = false; // Deselecciona el actual
 		        indice_actual = (indice_actual + 2) mod array_length(botones); // Mover al anterior
 		        botones[indice_actual].seleccionado = true; // Selecciona el nuevo
-			} else if ((indice_actual == 5 || indice_actual == 6) && (keyboard_check_pressed(vk_right) || (
+			} else if ((indice_actual == 6 || indice_actual == 7) && (keyboard_check_pressed(vk_right) || (
 				gamepad_button_check_pressed(global.current_gamepad, gp_padr) || (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislh) > 0.5) ))) {
 				botones[indice_actual].seleccionado = false; // Deselecciona el actual
 		        indice_actual = (indice_actual + 3) mod array_length(botones); // Mover al anterior

@@ -1,6 +1,6 @@
 /// @description Insert description here
 // You can write your code in this editor
-if (global.new_song_name == "" && global.new_song_id == undefined) {
+if (global.new_song_name == "" && global.new_song_id == undefined && !global.low_detail) {
 	if (array_length(global.song_visualizer[global.current_chart_index]) > 0) {
 		if (obj_play.play_music) {
 			if (current_time - delay > 500) {

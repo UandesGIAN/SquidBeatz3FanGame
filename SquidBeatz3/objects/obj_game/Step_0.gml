@@ -28,6 +28,19 @@ if (id == game_bar[0] && global.is_playing && global.current_song != undefined) 
 		
 		// AUTOMATICO
 		if (((obj_sync.current_life > 0 && global.lifebar) || !global.lifebar) && (obj_sync.song_end_delay == -1 || current_time - obj_sync.song_end_delay < 3700 || (global.practice_mode && global.base_x - 200 < final_x))) {
+			// Obtener posición real del audio
+		    var audio_position = audio_sound_get_track_position(obj_play.sound_playing);
+		    // Calcular tiempo aproximado basado en global.base_x
+		    var calculated_position = (global.start_point + global.base_x) / (global.tempo * (132 / 60));
+			//show_debug_message("globax: " + string(global.base_x) + "  pos: "+ string(calculated_position));
+		    // Verificar desincronización
+		    if (abs(audio_position - calculated_position) > 0.1 && global.base_x >= 0 && audio_position > 0.5 && global.low_detail) {
+		        // Re-sincronizar global.base_x
+		        audio_sound_set_track_position(obj_play.sound_playing, calculated_position); 
+				
+		        show_debug_message("Re-synchronized! New base_x: " + string(global.base_x));
+		    }
+			
 			with(obj_game) {
 				x += -global.tempo*proportion_bpm_to_speed;	// Desplazamiento a la izquierda de todas las barras
 			}
@@ -54,7 +67,6 @@ if (id == game_bar[0] && global.is_playing && global.current_song != undefined) 
 			        }
 			    }
 			}
-		
 			// Si la barra guia sale de la pantalla por la izquierda...
 			if (game_bar[index_bar].x + sprite_width < 0) {
 		        var max_x = -1;

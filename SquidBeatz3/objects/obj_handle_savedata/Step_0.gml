@@ -70,8 +70,8 @@ if (message_shown) {
 }
 
 
-if (message_shown2) {
-	if (keyboard_check_pressed(vk_escape)) {
+if (message_shown2 && current_time - open_delay > 250) {
+	if ((keyboard_check_pressed(vk_escape) && !global.is_gamepad) || (gamepad_button_check(global.current_gamepad, gp_face1) && global.is_gamepad)  && current_time - open_delay > 250) {
 		with (obj_editor_button) {
 			blocked = 0;
 		}
@@ -80,11 +80,24 @@ if (message_shown2) {
 		obj_sync_color_sample.blocked = 0;
 		obj_sync_color_sample.exit_delay = current_time;
 	}
-	if (keyboard_check_pressed(vk_left) || keyboard_check_pressed(vk_up)) {
-		selected_row = (selected_row - 1 + 2) % 2;
+	// Keyboard and Gamepad Navigation
+	if ((keyboard_check_pressed(vk_up) && !global.is_gamepad) || 
+	    (global.is_gamepad && (gamepad_button_check_pressed(global.current_gamepad, gp_padu) || 
+	    (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislv) < -0.5)))) {
+	    selected_row = max(0, (selected_row - 1 + 2) % 2); // Replace 2 with total rows if needed
+	    if (global.is_gamepad) stick_moved = 1;
 	}
-	if (keyboard_check_pressed(vk_right) || keyboard_check_pressed(vk_down)) {
-		selected_row = (selected_row + 1) % 2;
+
+	if ((keyboard_check_pressed(vk_down) && !global.is_gamepad) || 
+	    (global.is_gamepad && (gamepad_button_check_pressed(global.current_gamepad, gp_padd) || 
+	    (!stick_moved && gamepad_axis_value(global.current_gamepad, gp_axislv) > 0.5)))) {
+	    selected_row = max(0, (selected_row + 1) % 2); // Replace 2 with total rows if needed
+	    if (global.is_gamepad) stick_moved = 1;
+	}
+
+	// Reset stick movement when stick is centered
+	if (global.is_gamepad && abs(gamepad_axis_value(global.current_gamepad, gp_axislv)) < 0.2) {
+	    stick_moved = 0;
 	}
 	
 	var mx = mouse_x;
@@ -92,7 +105,7 @@ if (message_shown2) {
 	var padding = 20;
 	
 	if ((mouse_check_button_pressed(mb_left) && mx > msg_x2 + msg_width2 / 2 - string_width("[CANCELAR]") - 10 && mx < msg_x2 + msg_width2 / 2 + string_width("[CANCELAR]") + 10 && my > msg_y2 + 90 + 40 - padding && 
-	    my < msg_y2 + 90 + 40 + padding) || (selected_row == 0 && keyboard_check_pressed(vk_enter))) 
+	    my < msg_y2 + 90 + 40 + padding) || (selected_row == 0 && ((keyboard_check_pressed(vk_enter) && !global.is_gamepad ) || (global.is_gamepad && gamepad_button_check(global.current_gamepad, gp_face2))))) 
 	{
 	    // Acción para el botón CANCELAR
 	    message_shown2 = 0; // Ejemplo de acción, ajusta según lo necesario
@@ -106,7 +119,7 @@ if (message_shown2) {
 	// Botón "[BORRAR DATOS]"
 	if ((mouse_check_button_pressed(mb_left) && 
 	    mx > msg_x2 + msg_width2 / 2 - string_width("[BORRAR DATOS]") - 10 && mx < msg_x2 + msg_width2 / 2 + string_width("[BORRAR DATOS]") + 10 && my > msg_y2 + 120 + 20 + 60 - padding && 
-	    my < msg_y2 + 120  + 20 + 60 + padding) || (selected_row == 1 && keyboard_check_pressed(vk_enter))) 
+	    my < msg_y2 + 120  + 20 + 60 + padding) || (selected_row == 1 && ((keyboard_check_pressed(vk_enter) && !global.is_gamepad ) || (global.is_gamepad && gamepad_button_check(global.current_gamepad, gp_face2))))) 
 	{
 	    // Acción para el botón BORRAR DATOS
 	    for (var i = 0; i < array_length(global.song_text_list); i++) {

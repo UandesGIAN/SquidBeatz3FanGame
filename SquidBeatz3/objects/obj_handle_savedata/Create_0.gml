@@ -207,6 +207,7 @@ function load_ini_data(dir_path=working_directory + "save_data.ini", type_of_loa
 			global.interface_color_secondary = ini_read_real("Settings", "InterfaceColorSecondary", global.interface_color_secondary);
 			global.octo_icons = ini_read_real("Settings", "OctoIcons", global.octo_icons);
 			global.lifebar = ini_read_real("Settings", "LifeBar", global.lifebar);
+			global.low_detail = ini_read_real("Settings", "LowDetail", global.low_detail);
 			
 			show_debug_message(
 			    "Después de la asignación: " + 
@@ -282,6 +283,7 @@ function save_ini_data(dir_path=working_directory + "save_data.ini") {
 	ini_write_real("Settings", "InterfaceColorSecondary", global.interface_color_secondary);
 	ini_write_string("Settings", "OctoIcons", global.octo_icons);
 	ini_write_string("Settings", "LifeBar", global.lifebar);
+	ini_write_string("Settings", "LowDetail", global.low_detail);
 	ini_write_string("Settings", "Language", global.current_language);
 		
 	// Cerrar el archivo INI
@@ -318,7 +320,7 @@ function save_ini_data(dir_path=working_directory + "save_data.ini") {
 		}
 	}
 }
-
+stick_moved = 0;
 msg_width = 460;
 msg_height = 340;
 
@@ -334,3 +336,4 @@ msg_x2 = (room_width - msg_width) / 2;
 msg_y2 = (room_height - msg_height) / 2;
 
 selected_row = 0;
+open_delay = current_time;

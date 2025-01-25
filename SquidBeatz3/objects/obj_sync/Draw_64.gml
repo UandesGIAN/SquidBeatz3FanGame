@@ -19,7 +19,7 @@ if (type_of_hit != -1 && current_element_index > 0) {
             alpha = 0.8; // Totalmente transparente
             break;
     }
-	if (current_element_index >= 0 && current_element_index < array_length(elements)) {
+	if (current_element_index >= 0 && current_element_index < array_length(elements) && !global.low_detail) {
 		if (elements[current_element_index-1].index_type <= 1) {  // L_R
 		    rect_color = global.primary_color_yellow;
 		} else if (elements[current_element_index-1].index_type > 1 && elements[current_element_index-1].index_type <= 3) {  // ABXY
@@ -43,7 +43,7 @@ if (type_of_hit != -1 && current_element_index > 0) {
 		    draw_set_color(c_white); // Restaurar color blanco para otros dibujos
 		}
 	}
-		
+	
 	shader_set(shader_hue_shift);
 	shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
 
@@ -83,152 +83,156 @@ if (type_of_hit != -1 && current_element_index > 0) {
 	}
 	
 	shader_reset();
-
+	
 	// Dibujar el sprite correspondiente
-    if (type_of_hit == 0 && (current_time - text_timer) < 1200) {
-	    draw_sprite(spr_miss, 0, x, y - 32);
+	if (type_of_hit == 0 && (current_time - text_timer) < 1200) {
+		draw_sprite(spr_miss, 0, x, y - 32);
 	} else if (type_of_hit == 1 && (current_time - text_timer) < 1200) {
-	    draw_sprite(spr_bad, 0, x, y - 32);
+		draw_sprite(spr_bad, 0, x, y - 32);
 	} else if (type_of_hit == 2 && (current_time - text_timer) < 1200) {
-		array_sort(pos_x_hit, function(a, b) { return a - b; })
-		for (var j = 0; j < array_length(pos_y_hit); j++) {
-			if (current_time - hit_timer > 500 && j == array_length(pos_y_hit) - 1 && (pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j] < 0 || pos_y[elements[current_element_index-1].index_type] - pos_y_hit > room_height)) {
-				hit_timer = current_time;
-				pos_y_hit = [];
-				pos_x_hit = [];
-				alpha_hit = [];
-				break;
-			}
-			
-			if (missed_or_pressed_type == 0) {
-				draw_set_alpha(alpha_hit[j]);
-				draw_set_color(global.primary_color_yellow);
-				draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 0 ? pos_y[0] : pos_y[1]) + 26, 20,0);
-				alpha_hit[j]-=0.05;
-				
-				shader_set(shader_hue_shift);
-				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
-				draw_set_alpha(1);
-				draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
-				pos_y_hit[j] -= 25;
-				shader_reset();
-			} else if (missed_or_pressed_type == 1) {
-				draw_set_alpha(alpha_hit[j]);
-				draw_set_color(global.secondary_color_purple);
-				draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 2 ? pos_y[2] : pos_y[3]) + 26, 20,0);
-				alpha_hit[j]-=0.05;
-				
-				shader_set(shader_hue_shift);
-				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
-				draw_set_alpha(1);
-				draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
-				pos_y_hit[j] -= 25;
-				shader_reset();
-			} else {
-				draw_set_alpha(alpha_hit[j]);
-				draw_set_color(global.primary_color_yellow);
-				if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 4) {
-					draw_circle(pos_x_hit[j]+10, pos_y[0] + 26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[2] + 26, 20,0);
-				} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 5) {
-					draw_circle(pos_x_hit[j]+10, pos_y[1] + 26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[2] + 26, 20,0);
-				} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 6) {
-					draw_circle(pos_x_hit[j]+10, pos_y[0] + 26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[3] + 26, 20,0);
-				} else {
-					draw_circle(pos_x_hit[j]+10, pos_y[1] + 26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[3] + 26, 20,0);
+		if (!global.low_detail) {
+			array_sort(pos_x_hit, function(a, b) { return a - b; })
+			for (var j = 0; j < array_length(pos_y_hit); j++) {
+				if (current_time - hit_timer > 500 && j == array_length(pos_y_hit) - 1 && (pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j] < 0 || pos_y[elements[current_element_index-1].index_type] - pos_y_hit > room_height)) {
+					hit_timer = current_time;
+					pos_y_hit = [];
+					pos_x_hit = [];
+					alpha_hit = [];
+					break;
 				}
-				alpha_hit[j]-=0.05;
+			
+				if (missed_or_pressed_type == 0) {
+					draw_set_alpha(alpha_hit[j]);
+					draw_set_color(global.primary_color_yellow);
+					draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 0 ? pos_y[0] : pos_y[1]) + 26, 20,0);
+					alpha_hit[j]-=0.05;
 				
-				shader_set(shader_hue_shift);
-				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
-				draw_set_alpha(1);
-				draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
-				draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
-				pos_y_hit[j] -= 25;
-				shader_reset();
+					shader_set(shader_hue_shift);
+					shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+					draw_set_alpha(1);
+					draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
+					pos_y_hit[j] -= 25;
+					shader_reset();
+				} else if (missed_or_pressed_type == 1) {
+					draw_set_alpha(alpha_hit[j]);
+					draw_set_color(global.secondary_color_purple);
+					draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 2 ? pos_y[2] : pos_y[3]) + 26, 20,0);
+					alpha_hit[j]-=0.05;
+				
+					shader_set(shader_hue_shift);
+					shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+					draw_set_alpha(1);
+					draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
+					pos_y_hit[j] -= 25;
+					shader_reset();
+				} else {
+					draw_set_alpha(alpha_hit[j]);
+					draw_set_color(global.primary_color_yellow);
+					if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 4) {
+						draw_circle(pos_x_hit[j]+10, pos_y[0] + 26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[2] + 26, 20,0);
+					} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 5) {
+						draw_circle(pos_x_hit[j]+10, pos_y[1] + 26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[2] + 26, 20,0);
+					} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 6) {
+						draw_circle(pos_x_hit[j]+10, pos_y[0] + 26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[3] + 26, 20,0);
+					} else {
+						draw_circle(pos_x_hit[j]+10, pos_y[1] + 26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[3] + 26, 20,0);
+					}
+					alpha_hit[j]-=0.05;
+				
+					shader_set(shader_hue_shift);
+					shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+					draw_set_alpha(1);
+					draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
+					draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
+					pos_y_hit[j] -= 25;
+					shader_reset();
+				}
 			}
+			shader_reset();
 		}
-		shader_reset();
 		
-	    draw_sprite(spr_good, 0, x, y - 32);
-	    draw_set_font(fnt_splat_points);
+		draw_sprite(spr_good, 0, x, y - 32);
+		draw_set_font(fnt_splat_points);
 		draw_set_color(c_white);
-	    draw_text(x + sprite_get_width(spr_good) + 5, y - 32, string(combo_count)); // Dibujar el texto a la derecha del sprite
+		draw_text(x + sprite_get_width(spr_good) + 5, y - 32, string(combo_count)); // Dibujar el texto a la derecha del sprite
 	} else if ( type_of_hit == 3 && (current_time - text_timer) < 1200){
-		array_sort(pos_x_hit, function(a, b) { return a - b; })
-		for (var j = 0; j < array_length(pos_y_hit); j++) {
-			if (current_time - hit_timer > 1000 && j == array_length(pos_y_hit) - 1 && (pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j] < 0 || pos_y[elements[current_element_index-1].index_type] - pos_y_hit > room_height)) {
-				hit_timer = current_time;
-				pos_y_hit = [];
-				pos_x_hit = [];
-				break;
-			}
-			
-			if (missed_or_pressed_type == 0) {
-				draw_set_alpha(alpha_hit[j]);
-				draw_set_color(global.primary_color_yellow);
-				draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 0 ? pos_y[0] : pos_y[1])+26, 20,0);
-				alpha_hit[j]-=0.05;
-				
-				shader_set(shader_hue_shift);
-				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
-				draw_set_alpha(1);
-				draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
-				pos_y_hit[j] -= 25;
-				shader_reset();
-			} else if (missed_or_pressed_type == 1) {
-				draw_set_alpha(alpha_hit[j]);
-				draw_set_color(global.secondary_color_purple);
-				draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 2 ? pos_y[2] : pos_y[3])+26, 20,0);
-				alpha_hit[j]-=0.05;
-				
-				shader_set(shader_hue_shift);
-				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
-				draw_set_alpha(1);
-				draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
-				pos_y_hit[j] -= 25;
-				shader_reset();
-			} else {
-				draw_set_alpha(alpha_hit[j]);
-				draw_set_color(global.primary_color_yellow);
-				if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 4) {
-					draw_circle(pos_x_hit[j]+10, pos_y[0]+26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[2]+26, 20,0);
-				} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 5) {
-					draw_circle(pos_x_hit[j]+10, pos_y[1]+26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[2]+26, 20,0);
-				} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 6) {
-					draw_circle(pos_x_hit[j]+10, pos_y[0]+26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[3]+26, 20,0);
-				} else {
-					draw_circle(pos_x_hit[j]+10, pos_y[1]+26, 20,0);
-					draw_set_color(global.secondary_color_purple);
-					draw_circle(pos_x_hit[j]+10, pos_y[3]+26, 20,0);
+		if (!global.low_detail) {
+			array_sort(pos_x_hit, function(a, b) { return a - b; })
+			for (var j = 0; j < array_length(pos_y_hit); j++) {
+				if (current_time - hit_timer > 1000 && j == array_length(pos_y_hit) - 1 && (pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j] < 0 || pos_y[elements[current_element_index-1].index_type] - pos_y_hit > room_height)) {
+					hit_timer = current_time;
+					pos_y_hit = [];
+					pos_x_hit = [];
+					break;
 				}
-				alpha_hit[j]-=0.05;
+			
+				if (missed_or_pressed_type == 0) {
+					draw_set_alpha(alpha_hit[j]);
+					draw_set_color(global.primary_color_yellow);
+					draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 0 ? pos_y[0] : pos_y[1])+26, 20,0);
+					alpha_hit[j]-=0.05;
 				
-				shader_set(shader_hue_shift);
-				shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
-				draw_set_alpha(1);
-				draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
-				draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
-				pos_y_hit[j] -= 25;
-				shader_reset();
+					shader_set(shader_hue_shift);
+					shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+					draw_set_alpha(1);
+					draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
+					pos_y_hit[j] -= 25;
+					shader_reset();
+				} else if (missed_or_pressed_type == 1) {
+					draw_set_alpha(alpha_hit[j]);
+					draw_set_color(global.secondary_color_purple);
+					draw_circle(pos_x_hit[j]+10, (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 2 ? pos_y[2] : pos_y[3])+26, 20,0);
+					alpha_hit[j]-=0.05;
+				
+					shader_set(shader_hue_shift);
+					shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+					draw_set_alpha(1);
+					draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
+					pos_y_hit[j] -= 25;
+					shader_reset();
+				} else {
+					draw_set_alpha(alpha_hit[j]);
+					draw_set_color(global.primary_color_yellow);
+					if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 4) {
+						draw_circle(pos_x_hit[j]+10, pos_y[0]+26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[2]+26, 20,0);
+					} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 5) {
+						draw_circle(pos_x_hit[j]+10, pos_y[1]+26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[2]+26, 20,0);
+					} else if (elements[current_element_index-array_length(pos_y_hit)+j].index_type == 6) {
+						draw_circle(pos_x_hit[j]+10, pos_y[0]+26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[3]+26, 20,0);
+					} else {
+						draw_circle(pos_x_hit[j]+10, pos_y[1]+26, 20,0);
+						draw_set_color(global.secondary_color_purple);
+						draw_circle(pos_x_hit[j]+10, pos_y[3]+26, 20,0);
+					}
+					alpha_hit[j]-=0.05;
+				
+					shader_set(shader_hue_shift);
+					shader_set_uniform_f(shader_get_uniform(shader_hue_shift, "hue_shift"), global.hue_shift);
+					draw_set_alpha(1);
+					draw_sprite(type_spr[0], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] + pos_y_hit[j]);
+					draw_sprite(type_spr[2], 0, pos_x_hit[j], pos_y[elements[current_element_index-1].index_type] - pos_y_hit[j]);
+					pos_y_hit[j] -= 25;
+					shader_reset();
+				}
 			}
 		}
 		
 		draw_sprite(spr_fresh, 0, x, y - 32);
-	    draw_set_font(fnt_splat_points); // Establecer la fuente
+		draw_set_font(fnt_splat_points); // Establecer la fuente
 		draw_set_color(make_color_rgb(242, 255, 184));
 		draw_text(x + sprite_get_width(spr_fresh) + 6, y - 34, string(combo_count)); // Dibujar el texto a la derecha del sprite
 		draw_set_color(make_color_rgb(255, 184, 245));

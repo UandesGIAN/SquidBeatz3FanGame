@@ -159,7 +159,7 @@ if (obj_sync.game_win_for_first_time && total_elements > 0) {
 	}
 }
 
-if (play_music) {
+if (play_music && !global.low_detail) {
 	if (global.custom_sprites[0] == 0) {
 	    if (current_time - prev_frame_timer > (current_sprite == spr_dance6 || current_sprite == spr_dance8 ? 34 : 31) && obj_sync.current_life > 0 && obj_sync.current_element_index < array_length(obj_sync.elements)) {
 			animation_timer++;

@@ -7,7 +7,7 @@ if (!variable_global_exists("first_load")) {
 if (!global.first_load) {
 	room_goto(Start);
 }
-
+global.current_chart = [];
 // FUNCION UTIL PARA OBTENER CONTENIDO DENTRO DE UN DIRECTORIO DEL TIPO pattern
 function get_directory_contents(dname, pattern) {
     var result = [];

@@ -384,6 +384,7 @@ global.new_song_id = undefined;
 global.async_id = undefined;
 global.new_song_path = "";
 global.new_song_visualizer = [];
+global.current_chart = [];
 
 global.sound_delay = 0;
 if (array_length(global.song_text_list) - 1 > 0) global.current_song_index = 1;
@@ -417,4 +418,7 @@ if (!variable_global_exists("octo_icons")) {
 }
 if (!variable_global_exists("lifebar")) {
 	global.lifebar = 1;
+}
+if (!variable_global_exists("low_detail")) {
+    global.low_detail = 0;
 }

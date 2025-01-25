@@ -29,12 +29,14 @@ prev_type_backup = -1;
 prev_pos_x_backup = -1;
 
 // Copia de charteo siendo editado
-global.current_chart = [];
-if (global.new_song_id == undefined || global.new_song_name == "") {
-	for (var i = 0; i < array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]); i++) {
-		var element = global.charts[$ global.current_difficulty].charts[global.current_chart_index][i];
-		array_push(global.current_chart, element);
-	}	
+if (array_length(global.current_chart) == 0) {
+	global.current_chart = [];
+	if (global.new_song_id == undefined || global.new_song_name == "") {
+		for (var i = 0; i < array_length(global.charts[$ global.current_difficulty].charts[global.current_chart_index]); i++) {
+			var element = global.charts[$ global.current_difficulty].charts[global.current_chart_index][i];
+			array_push(global.current_chart, element);
+		}	
+	}
 }
 
 sort_elements_max_min_1 = [];
